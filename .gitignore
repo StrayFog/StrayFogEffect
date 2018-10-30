@@ -3,3 +3,9 @@
 ################################################################################
 
 /.vs/StrayFogEffect/v15
+/Library
+/obj/Debug
+/Temp
+/StrayFogWater.csproj
+/StrayFogEffect.sln
+/Assembly-CSharp.csproj
