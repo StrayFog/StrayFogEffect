@@ -34,6 +34,16 @@ public class WaterCamera : MonoBehaviour
         }
         #endregion
 
+        #region 创建绘制水纹RenderTexture
+        if (!renderTexture)
+        {            
+            renderTexture = new RenderTexture(512,512, 16);
+            renderTexture.name = "WaterRenderTexture_" + _waterPlaneSideSign.ToString();
+            renderTexture.isPowerOfTwo = true;
+            renderTexture.hideFlags = HideFlags.DontSave;
+        }
+        #endregion
+
         #region 设置摄像机属性
         mCamera.CopyFrom(_eyeCamera);
         mCamera.transform.position = _eyeCamera.transform.position;
@@ -65,158 +75,46 @@ public class WaterCamera : MonoBehaviour
         mCamera.orthographicSize = _eyeCamera.orthographicSize;
         mCamera.worldToCameraMatrix = _eyeCamera.worldToCameraMatrix;
         mCamera.cullingMask = ~(1 << _waterPlaneLayer); // never render water layer        
-        mCamera.targetTexture = null;
+        mCamera.targetTexture = renderTexture;
+        Vector3 reflectionOldpos = Vector3.zero;
+        Vector3 reflectionNewpos = Vector3.zero;
+
+        if (_waterPlaneSideSign > 0)
+        {
+            float d = -Vector3.Dot(_waterPlaneNormal, _waterPlanePosition) - _clipPlaneOffset;
+            Vector4 reflectionPlane = new Vector4(_waterPlaneNormal.x, _waterPlaneNormal.y, _waterPlaneNormal.z, d);
+
+            Matrix4x4 reflection = Matrix4x4.zero;
+            CalculateReflectionMatrix(ref reflection, reflectionPlane);
+            reflectionOldpos = _eyeCamera.transform.position;
+            reflectionNewpos = reflection.MultiplyPoint(reflectionOldpos);
+            mCamera.worldToCameraMatrix = mCamera.worldToCameraMatrix * reflection;
+        }
         Vector4 clipPlane = CameraSpacePlane(mCamera, _waterPlanePosition, _waterPlaneNormal, _waterPlaneSideSign, _clipPlaneOffset);
         Matrix4x4 projection = _eyeCamera.projectionMatrix;
         CalculateObliqueMatrix(ref projection, clipPlane);
         mCamera.projectionMatrix = projection;
         #endregion
 
-        mCamera.Render();
+        #region 绘图
+        if (_waterPlaneSideSign > 0)
+        {
+            GL.invertCulling = true;
+            mCamera.transform.position = reflectionNewpos;
+            Vector3 euler = _eyeCamera.transform.eulerAngles;
+            mCamera.transform.eulerAngles = new Vector3(-euler.x, euler.y, euler.z);
+            mCamera.Render();
+            mCamera.transform.position = reflectionOldpos;
+            GL.invertCulling = false;
+        }
+        else
+        {
+            mCamera.Render();
+        }
+        #endregion
     }
 
-
-    ///// <summary>
-    ///// 水摄像机
-    ///// </summary>
-    //public Camera waterCamera { get; private set; }
-
-
-    //public bool m_DisablePixelLights = true;
-    //public int m_TextureSize = 256;
-    //public float m_ClipPlaneOffset = 0.07f;
-    //public LayerMask m_RefractLayers = -1;
-    //Camera m_RefractionCamera;
-    //private RenderTexture m_RefractionTexture = null;
-    //private int m_OldRefractionTextureSize = 0;
-    //private bool s_InsideWater = false;
-    //// This is called when it's known that the object will be rendered by some
-    //// camera. We render reflections / refractions and do other updates here.
-    //// Because the script executes in edit mode, reflections for the scene view
-    //// camera will just work!
-    //public void OnWillRenderObject()
-    //{
-    //    if (!enabled || !GetComponent<Renderer>() || !GetComponent<Renderer>().sharedMaterial || !GetComponent<Renderer>().enabled)
-    //        return;
-
-    //    Camera cam = Camera.current;
-    //    if (!cam)
-    //        return;
-
-    //    // Safeguard from recursive water reflections.		
-    //    if (s_InsideWater)
-    //        return;
-    //    s_InsideWater = true;
-    //    this.gameObject.layer = 4;
-    //    // Actual water rendering mode depends on both the current setting AND
-    //    // the hardware support. There's no point in rendering refraction textures
-    //    // if they won't be visible in the end.
-
-    //    CreateWaterObjects(cam, ref m_RefractionCamera);
-
-    //    // find out the reflection plane: position and normal in world space
-    //    Vector3 pos = transform.position;
-    //    Vector3 normal = transform.up;
-
-    //    // Optionally disable pixel lights for reflection/refraction
-    //    int oldPixelLightCount = QualitySettings.pixelLightCount;
-    //    if (m_DisablePixelLights)
-    //        QualitySettings.pixelLightCount = 0;
-
-    //    UpdateCameraModes(cam, m_RefractionCamera);
-    //    m_RefractionCamera.worldToCameraMatrix = cam.worldToCameraMatrix;
-
-    //    // Setup oblique projection matrix so that near plane is our reflection
-    //    // plane. This way we clip everything below/above it for free.
-    //    Vector4 clipPlane = CameraSpacePlane(m_RefractionCamera, pos, normal, -1.0f);
-    //    Matrix4x4 projection = cam.projectionMatrix;
-    //    CalculateObliqueMatrix(ref projection, clipPlane);
-    //    m_RefractionCamera.projectionMatrix = projection;
-
-    //    m_RefractionCamera.cullingMask = ~(1 << 4) & m_RefractLayers.value; // never render water layer
-    //    //refractionCamera.targetTexture = m_RefractionTexture;
-    //    m_RefractionCamera.transform.position = cam.transform.position;
-    //    m_RefractionCamera.transform.rotation = cam.transform.rotation;
-    //    m_RefractionCamera.Render();
-    //    WaterCamera rcm = m_RefractionCamera.gameObject.GetComponent<WaterCamera>();
-    //    if (rcm)
-    //    {
-    //        GetComponent<Renderer>().sharedMaterial.SetTexture("_RefractionTex", rcm.waterRenderTexture);
-    //        //GetComponent<Renderer>().sharedMaterial.SetTexture("_RefractionTex", m_RefractionTexture);
-    //    }
-
-
-    //    // Restore pixel light count
-    //    if (m_DisablePixelLights)
-    //        QualitySettings.pixelLightCount = oldPixelLightCount;
-    //    s_InsideWater = false;
-    //}
-
-
-    //// Cleanup all the objects we possibly have created
-    //void OnDisable()
-    //{
-    //    if (m_RefractionTexture)
-    //    {
-    //        DestroyImmediate(m_RefractionTexture);
-    //        m_RefractionTexture = null;
-    //    }
-    //    if (m_RefractionCamera)
-    //    {
-    //        DestroyImmediate(m_RefractionCamera.gameObject);
-    //        m_RefractionCamera = null;
-    //    }
-    //}
-
-    //private void UpdateCameraModes(Camera src, Camera dest)
-    //{
-    //    if (dest == null)
-    //        return;
-    //    // set water camera to clear the same way as current camera
-    //    dest.clearFlags = src.clearFlags;
-    //    dest.backgroundColor = src.backgroundColor;
-    //    if (src.clearFlags == CameraClearFlags.Skybox)
-    //    {
-    //        Skybox sky = src.GetComponent(typeof(Skybox)) as Skybox;
-    //        Skybox mysky = dest.GetComponent(typeof(Skybox)) as Skybox;
-    //        if (!sky || !sky.material)
-    //        {
-    //            mysky.enabled = false;
-    //        }
-    //        else
-    //        {
-    //            mysky.enabled = true;
-    //            mysky.material = sky.material;
-    //        }
-    //    }
-    //    // update other values to match current camera.
-    //    // even if we are supplying custom camera&projection matrices,
-    //    // some of values are used elsewhere (e.g. skybox uses far plane)
-    //    dest.farClipPlane = src.farClipPlane;
-    //    dest.nearClipPlane = src.nearClipPlane;
-    //    dest.orthographic = src.orthographic;
-    //    dest.fieldOfView = src.fieldOfView;
-    //    dest.aspect = src.aspect;
-    //    dest.orthographicSize = src.orthographicSize;
-    //}
-
-    //// On-demand create any objects we need for water
-    //private void CreateWaterObjects(Camera currentCamera, ref Camera refractionCamera)
-    //{
-    //    if (!refractionCamera) // catch both not-in-dictionary and in-dictionary-but-deleted-GO
-    //    {
-    //        GameObject go = new GameObject("Water Refr Camera id" + GetInstanceID() + " for " + currentCamera.GetInstanceID(), typeof(Camera), typeof(Skybox));
-    //        refractionCamera = go.GetComponent<Camera>();
-    //        refractionCamera.enabled = false;
-    //        refractionCamera.transform.position = transform.position;
-    //        refractionCamera.transform.rotation = transform.rotation;
-    //        refractionCamera.gameObject.AddComponent<FlareLayer>();
-    //        refractionCamera.targetDisplay = 7;
-    //        refractionCamera.gameObject.AddComponent<WaterCamera>();
-    //        //go.hideFlags = HideFlags.DontSave;
-    //    }
-    //}
-
+    #region 视图矩阵
     // Extended sign: returns -1, 0 or 1 based on sign of a
     private static float sgn(float a)
     {
@@ -254,8 +152,27 @@ public class WaterCamera : MonoBehaviour
         projection[14] = c.w - projection[15];
     }
 
-    void OnRenderImage(RenderTexture source, RenderTexture destination)
+    void CalculateReflectionMatrix(ref Matrix4x4 reflectionMat, Vector4 plane)
     {
-        renderTexture = source;
+        reflectionMat.m00 = (1F - 2F * plane[0] * plane[0]);
+        reflectionMat.m01 = (-2F * plane[0] * plane[1]);
+        reflectionMat.m02 = (-2F * plane[0] * plane[2]);
+        reflectionMat.m03 = (-2F * plane[3] * plane[0]);
+
+        reflectionMat.m10 = (-2F * plane[1] * plane[0]);
+        reflectionMat.m11 = (1F - 2F * plane[1] * plane[1]);
+        reflectionMat.m12 = (-2F * plane[1] * plane[2]);
+        reflectionMat.m13 = (-2F * plane[3] * plane[1]);
+
+        reflectionMat.m20 = (-2F * plane[2] * plane[0]);
+        reflectionMat.m21 = (-2F * plane[2] * plane[1]);
+        reflectionMat.m22 = (1F - 2F * plane[2] * plane[2]);
+        reflectionMat.m23 = (-2F * plane[3] * plane[2]);
+
+        reflectionMat.m30 = 0F;
+        reflectionMat.m31 = 0F;
+        reflectionMat.m32 = 0F;
+        reflectionMat.m33 = 1F;
     }
+    #endregion
 }

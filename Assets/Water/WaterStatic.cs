@@ -58,7 +58,27 @@ public class WaterStatic : MonoBehaviour
 
         #region 固定设置
         this.gameObject.layer = 4;
-        mWaterMaterial = GetComponent<Renderer>().sharedMaterial;
+        if (mWaterMaterial == null)
+        {
+            mWaterMaterial = GetComponent<Renderer>().sharedMaterial;
+        }
+
+        if (useReflective && useRefractive)
+        {
+            mWaterMaterial.SetInt("_WaterDisplayMode", 0);
+        }
+        else if (useReflective)
+        {
+            mWaterMaterial.SetInt("_WaterDisplayMode", 1);
+        }
+        else if (useRefractive)
+        {
+            mWaterMaterial.SetInt("_WaterDisplayMode", 2);
+        }
+        else
+        {
+            mWaterMaterial.SetInt("_WaterDisplayMode", -1);
+        }
         #endregion
 
         #region 是否绘制反射
@@ -81,8 +101,8 @@ public class WaterStatic : MonoBehaviour
             mReflectiveCamera.Render(eyeCamera, this.gameObject.layer, transform.position, transform.up, 1, clipPlaneOffset);
             if (mReflectiveCamera.renderTexture)
             {
-                //mWaterMaterial.SetTexture("_ReflectiveTex", mReflectiveCamera.renderTexture);
-            }
+                mWaterMaterial.SetTexture("_ReflectionTex", mReflectiveCamera.renderTexture);
+            }            
         }
         else if(mReflectiveCamera)
         {
@@ -115,12 +135,11 @@ public class WaterStatic : MonoBehaviour
             }            
         }
         else if (mRefractiveCamera)
-        {
+        {       
             DestroyImmediate(mRefractiveCamera.gameObject);
             mRefractiveCamera = null;
         }
         #endregion
-
         mIsRenderWater = false;
     }
     #endregion
