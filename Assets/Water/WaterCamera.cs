@@ -45,7 +45,6 @@ public class WaterCamera : MonoBehaviour
         #endregion
 
         #region 设置摄像机属性
-        mCamera.CopyFrom(_eyeCamera);
         mCamera.transform.position = _eyeCamera.transform.position;
         mCamera.transform.rotation = _eyeCamera.transform.rotation;
         mCamera.clearFlags = _eyeCamera.clearFlags;
@@ -76,6 +75,8 @@ public class WaterCamera : MonoBehaviour
         mCamera.worldToCameraMatrix = _eyeCamera.worldToCameraMatrix;
         mCamera.cullingMask = ~(1 << _waterPlaneLayer); // never render water layer        
         mCamera.targetTexture = renderTexture;
+        mCamera.depthTextureMode = DepthTextureMode.None;
+        mCamera.renderingPath = RenderingPath.Forward;
         Vector3 reflectionOldpos = Vector3.zero;
         Vector3 reflectionNewpos = Vector3.zero;
 
