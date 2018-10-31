@@ -79,6 +79,8 @@ public class WaterStatic : MonoBehaviour
         {
             mWaterMaterial.SetInt("_WaterDisplayMode", -1);
         }
+
+        eyeCamera.depthTextureMode |= DepthTextureMode.Depth;
         #endregion
 
         #region 是否绘制反射

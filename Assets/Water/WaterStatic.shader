@@ -13,8 +13,8 @@ Shader "Effect/Water/Water (Static)"
 	// -----------------------------------------------------------
 	// Fragment program cards
 	Subshader{
-		Tags {"RenderType" = "Opaque" }
-		Pass {
+		Tags { "RenderType" = "Opaque" }
+		Pass {			
 			CGPROGRAM
 				#pragma vertex vert
 				#pragma fragment frag
@@ -30,12 +30,13 @@ Shader "Effect/Water/Water (Static)"
 
 				uniform half _WaterDisplayMode;
 
+				sampler2D _CameraDepthTexture;
 				sampler2D _WaterTex;
 
 				struct v2f {
 					float4 pos : SV_POSITION;
 					float4 uv  : TEXCOORD0;
-					float4 ref : TEXCOORD2;					
+					float4 screenPos : TEXCOORD2;					
 					float3 normal:NORMAL;
 					float3 viewDir : NORMAL1;
 				};
@@ -45,38 +46,52 @@ Shader "Effect/Water/Water (Static)"
 					v2f o;
 					o.uv = v.texcoord;
 					o.pos = UnityObjectToClipPos(v.vertex);
-					o.ref = ComputeScreenPos(o.pos);
+					o.screenPos = ComputeScreenPos(o.pos);
 					o.normal = v.normal;
-					o.viewDir = ObjSpaceViewDir(v.vertex);					
+					o.viewDir = ObjSpaceViewDir(v.vertex);		
+					COMPUTE_EYEDEPTH(o.screenPos.z);
 					return o;
 				}
 
 				half4 frag(v2f i) : COLOR
 				{
-					half4 color = tex2D(_WaterTex, i.uv);
+					float4 color = tex2D(_WaterTex, i.uv);
+					float4 refColor = float4(1, 1, 1, 1);
+					float edgeDepth = 1;
 
-					float4 uv1 = i.ref;
-					half4 refl = tex2Dproj(_ReflectionTex,UNITY_PROJ_COORD(uv1))*_ReflColor;					
-
-					float4 uv2 = i.ref;
-					half4 refr = tex2Dproj(_RefractionTex, UNITY_PROJ_COORD(uv2)) * _RefrColor;
-
-					float3 viewDir = normalize(i.viewDir);
-					float fresnel = saturate(dot(viewDir,normalize(i.normal)));
-
-					switch (_WaterDisplayMode)
-					{
-					case 0:
-						color *= lerp(refl, refr, fresnel);
-						break;
-					case 1:
-						color *= refl;
-						break;
-					case 2:
-						color *= refr;
-						break;
+					//通过深度纹理查询岸边与水里
+					{//0-1 : 岸边-水里
+						edgeDepth = tex2Dproj(_CameraDepthTexture, i.screenPos).r;
+						edgeDepth = LinearEyeDepth(edgeDepth) - i.screenPos.z;
+						edgeDepth = 1 - edgeDepth;
 					}
-					return color;
+
+					//计算反射与折射
+					{
+						float4 uv1 = i.screenPos;
+						half4 refl = tex2Dproj(_ReflectionTex, UNITY_PROJ_COORD(uv1))*_ReflColor;
+
+						float4 uv2 = i.screenPos;
+						half4 refr = tex2Dproj(_RefractionTex, UNITY_PROJ_COORD(uv2)) * _RefrColor;
+
+						float3 viewDir = normalize(i.viewDir);
+						float fresnel = saturate(dot(viewDir, normalize(i.normal)));
+
+						switch (_WaterDisplayMode)
+						{
+						case 0:
+							refColor *= lerp(refl, refr, fresnel);
+							break;
+						case 1:
+							refColor *= refl;
+							break;
+						case 2:
+							refColor *= refr;
+							break;
+						}
+					}
+					
+					return float4(1,1,1,1) * edgeDepth;
 				}
 				ENDCG
 		}
