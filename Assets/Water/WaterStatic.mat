@@ -66,6 +66,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _WaterNormal:
+        m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _WaterTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -100,4 +104,4 @@ Material:
     - _ReflectiveColor: {r: 1, g: 1, b: 1, a: 1}
     - _RefrColor: {r: 1, g: 1, b: 1, a: 1}
     - _Specular: {r: 0, g: 0, b: 0, a: 0}
-    - _WaterColor: {r: 0, g: 0.81960773, b: 1, a: 1}
+    - _WaterColor: {r: 1, g: 1, b: 1, a: 1}

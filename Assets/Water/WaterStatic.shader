@@ -2,6 +2,7 @@ Shader "Effect/Water/Water (Static)"
 {
 	Properties{
 		_WaterTex("Main Tex (RGB)", 2D) = "white" {}
+		_WaterNormal("Normal Tex (RGB)", 2D) = "black" {}
 		_WaterColor("Color", COLOR) = (1,1,1,1)//( .34, .85, .92, 1)
 
 		_ReflectionTex("Internal Reflection", 2D) = "white" {}
@@ -11,8 +12,9 @@ Shader "Effect/Water/Water (Static)"
 	// -----------------------------------------------------------
 	// Fragment program cards
 	Subshader{		
+		Tags { "Queue" = "Transparent-10" }
 		Pass {			
-			/*Blend SrcAlpha OneMinusSrcAlpha*/			
+			Blend SrcAlpha OneMinusSrcAlpha	
 			CGPROGRAM
 				#pragma vertex vert
 				#pragma fragment frag
@@ -27,6 +29,11 @@ Shader "Effect/Water/Water (Static)"
 
 				sampler2D _CameraDepthTexture;
 				sampler2D _WaterTex;
+				float4 _WaterTex_ST;
+
+				sampler2D _WaterNormal;
+				float4 _WaterNormal_ST;
+
 				uniform float4 _WaterColor;
 
 				struct v2f {
@@ -51,7 +58,7 @@ Shader "Effect/Water/Water (Static)"
 
 				half4 frag(v2f i) : COLOR
 				{
-					float4 color = tex2D(_WaterTex, i.uv) * _WaterColor;
+					float4 color = tex2D(_WaterTex, i.uv* _WaterTex_ST.xy + _WaterTex_ST.zw) * _WaterColor;
 
 					float4 refColor = float4(1, 1, 1, 1);
 					float edgeDepth = 0;
@@ -87,7 +94,8 @@ Shader "Effect/Water/Water (Static)"
 						}
 					}	
 
-					return color * refColor * edgeDepth;
+					color.a *= edgeDepth;
+					return color * refColor;
 				}
 				ENDCG
 		}
