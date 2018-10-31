@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 0
     path: 
     guid: 00000000000000000000000000000000
+  - enabled: 1
+    path: Assets/Water/IsLand.unity
+    guid: 754e8b728ebadf94bbd7480bfd335dbc
   m_configObjects: {}

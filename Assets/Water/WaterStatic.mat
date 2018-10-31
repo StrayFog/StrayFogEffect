@@ -71,7 +71,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _WaterTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
@@ -91,17 +91,17 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _Tiling: 0.25
+    - _Tiling: 0.025
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _Color0: {r: 1, g: 1, b: 1, a: 1}
-    - _Color1: {r: 0, g: 0, b: 0, a: 0}
+    - _Color0: {r: 0.5764706, g: 0.94509804, b: 1, a: 1}
+    - _Color1: {r: 0, g: 0.1254902, b: 0.21568628, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _InvRanges: {r: 1, g: 0.17, b: 0.17, a: 0}
     - _ReflColor: {r: 1, g: 1, b: 1, a: 1}
     - _ReflectiveColor: {r: 1, g: 1, b: 1, a: 1}
     - _RefrColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Specular: {r: 0, g: 0, b: 0, a: 0}
+    - _Specular: {r: 0.5764706, g: 0.5764706, b: 0.5764706, a: 0}
     - _WaterColor: {r: 1, g: 1, b: 1, a: 1}

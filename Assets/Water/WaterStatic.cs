@@ -18,6 +18,7 @@ public class WaterStatic : MonoBehaviour
     /// 裁剪面偏移
     /// </summary>
     public float clipPlaneOffset = 0.07f;
+
     /// <summary>
     /// 眼睛摄像机
     /// </summary>
@@ -57,7 +58,7 @@ public class WaterStatic : MonoBehaviour
         #endregion
 
         #region 固定设置
-        this.gameObject.layer = 4;
+        gameObject.layer = 4;
         if (mWaterMaterial == null)
         {
             mWaterMaterial = GetComponent<Renderer>().sharedMaterial;
