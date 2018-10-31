@@ -89,3 +89,4 @@ Material:
     - _ReflColor: {r: 1, g: 1, b: 1, a: 1}
     - _ReflectiveColor: {r: 1, g: 1, b: 1, a: 1}
     - _RefrColor: {r: 1, g: 1, b: 1, a: 1}
+    - _WaterColor: {r: 0, g: 0.8181484, b: 1, a: 1}
