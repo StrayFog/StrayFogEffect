@@ -1,7 +1,7 @@
 Shader "Effect/Water/Water (Static)"
 {
 	Properties{
-		_WaterTex("Normal Map (RGB), Foam (A)", 2D) = "white" {}
+		_WaterNormal("Normal Map (RGB), Foam (A)", 2D) = "white" {}
 		_Color0("Shallow Color", Color) = (1,1,1,1)
 		_Color1("Deep Color", Color) = (0,0,0,0)
 		_Specular("Specular", Color) = (0,0,0,0)
@@ -9,6 +9,9 @@ Shader "Effect/Water/Water (Static)"
 		_Tiling("Tiling", Range(0.025, 0.25)) = 0.25
 		_ReflectionTint("Reflection Tint", Range(0.0, 1.0)) = 0.8
 		_InvRanges("Inverse Alpha, Depth and Color ranges", Vector) = (1.0, 0.17, 0.17, 0.0)
+
+		_FlowSpeed("Flow Speed", Float) = 0.3
+		_WaveHeight("Wave Height", Float) = 0.1
 
 		_ReflectionTex("Internal Reflection", 2D) = "white" {}
 		_RefractionTex("Internal Refraction", 2D) = "white" {}
@@ -35,7 +38,7 @@ Shader "Effect/Water/Water (Static)"
 	half4 _InvRanges;
 
 	sampler2D _CameraDepthTexture;
-	sampler2D _WaterTex;
+	sampler2D _WaterNormal;
 
 	half4 LightingPPL(SurfaceOutput s, half3 lightDir, half3 viewDir, half atten)
 	{
@@ -85,6 +88,9 @@ Shader "Effect/Water/Water (Static)"
 
 		//uniform float4 _RefractionTex_ST;
 		uniform float4 _RefractionTex_TexelSize;
+		uniform float4 _WaterNormal_ST;
+
+		uniform float _FlowSpeed, _WaveHeight;
 
 		struct Input
 		{
@@ -94,8 +100,37 @@ Shader "Effect/Water/Water (Static)"
 			float4 proj1	 : TEXCOORD4;	// Used for the refraction texture
 		};
 
+		//获得LinearEyeDepth深度差，差值代表从水到陆地的深度过度
+		float GetLinearEyeDepthDiff(Input IN)
+		{
+			float depth = tex2Dproj(_CameraDepthTexture, IN.proj0).r;
+			depth = LinearEyeDepth(depth);
+			depth -= IN.proj0.z;
+			return depth;
+		}
+
+		// Fast sincos
+		float SmoothCurve(float x) {
+			return x * x *(3.0 - 2.0 * x);
+		}
+		float TriangleWave(float x) {
+			return abs(frac(x + 0.5) * 2.0 - 1.0);
+		}
+		float SmoothTriangleWave(float x) {
+			return SmoothCurve(TriangleWave(x));
+		}
+
 		void vert(inout appdata_full v, out Input o)
 		{
+			float time = _Time.y * _FlowSpeed;
+			float vhpos = v.vertex.x + v.vertex.z;
+			float hoffset = SmoothTriangleWave(time + vhpos * 0.125);
+			hoffset += SmoothTriangleWave(time + vhpos * 0.361);
+			hoffset += SmoothTriangleWave(time + vhpos * 0.076);
+			_WaveHeight = -abs(_WaveHeight);
+			v.vertex.y += hoffset * _WaveHeight * _FlowSpeed;
+			v.normal = mul((float3x3)unity_WorldToObject, float3(0, 1, 0));
+
 			o.worldPos = v.vertex.xyz;
 			o.position = UnityObjectToClipPos(v.vertex);
 			o.proj0 = ComputeScreenPos(o.position);
@@ -116,7 +151,8 @@ Shader "Effect/Water/Water (Static)"
 			// Calculate the object-space normal (Z-up)
 			float offset = _Time.x * 0.5;
 			half2 tiling = IN.worldPos.xz * _Tiling;
-			half4 nmap = (tex2D(_WaterTex, tiling + offset) + tex2D(_WaterTex, half2(-tiling.y, tiling.x) - offset)) * 0.5;
+			half4 nmap = (tex2D(_WaterNormal, tiling + offset) +
+				tex2D(_WaterNormal, half2(-tiling.y, tiling.x) - offset)) * 0.5;
 			o.Normal = nmap.xyz * 2.0 - 1.0;
 
 			// World space normal (Y-up)
@@ -124,9 +160,7 @@ Shader "Effect/Water/Water (Static)"
 			worldNormal.z = -worldNormal.z;
 
 			// Calculate the depth difference at the current pixel
-			float depth = tex2Dproj(_CameraDepthTexture, IN.proj0).r;
-			depth = LinearEyeDepth(depth);
-			depth -= IN.proj0.z;
+			float depth = GetLinearEyeDepthDiff(IN);
 
 			// Calculate the depth ranges (X = Alpha, Y = Color Depth)
 			half3 ranges = saturate(_InvRanges.xyz * depth);
@@ -150,6 +184,7 @@ Shader "Effect/Water/Water (Static)"
 			IN.proj0.xy += o.Normal.xy * 0.5;
 			half3 reflection = tex2Dproj(_ReflectionTex, IN.proj0).rgb;
 			reflection = lerp(reflection * col.rgb, reflection, fresnel * _ReflectionTint);
+			
 
 			// High-quality refraction uses the grab pass texture
 			IN.proj1.xy += o.Normal.xy * _RefractionTex_TexelSize.xy * (20.0 * IN.proj1.z * col.a);
@@ -160,7 +195,7 @@ Shader "Effect/Water/Water (Static)"
 			refraction = lerp(lerp(col.rgb, col.rgb * refraction, ranges.y), refraction, ranges.y);
 
 			// The amount of foam added (35% of intensity so it's subtle)
-			half foam = nmap.a * (1.0 - abs(col.a * 2.0 - 1.0)) * 0.35;
+			half foam = nmap.a * (1.0 - abs(col.a * 2.0 - 1.0)) * 0.20;
 
 			// Always assume 20% reflection right off the bat, and make the fresnel fade out slower so there is more refraction overall
 			fresnel *= fresnel * fresnel;
@@ -184,100 +219,4 @@ Shader "Effect/Water/Water (Static)"
 		}
 		ENDCG
 	}
-
-	//// -----------------------------------------------------------
-	//// Fragment program cards
-	//Subshader{		
-	//	Tags { "Queue" = "Transparent-10" }
-	//	Pass {			
-	//		Blend SrcAlpha OneMinusSrcAlpha	
-	//		CGPROGRAM
-	//			#include "Lighting.cginc"
-
-	//			#pragma vertex vert
-	//			#pragma fragment frag
-	//			#pragma fragmentoption ARB_precision_hint_fastest 
-	//			//#pragma multi_compile WATER_REFLECTIVE WATER_REFRACTIVE
-	//			#include "UnityCG.cginc"
-
-	//			uniform sampler2D _ReflectionTex;
-	//			uniform sampler2D _RefractionTex;
-
-	//			uniform half _WaterDisplayMode;
-
-	//			sampler2D _CameraDepthTexture;
-
-	//			sampler2D _WaterNormal;
-	//			float4 _WaterNormal_ST;
-
-	//			uniform float4 _WaterColor;
-
-	//			struct v2f {
-	//				float4 clipPos : SV_POSITION;					
-	//				float4 uv  : TEXCOORD0;
-	//				float4 screenPos : TEXCOORD1;
-	//				float3 normal:NORMAL;
-	//				float3 viewDir : NORMAL1;
-	//			};
-
-	//			v2f vert(appdata_tan v)
-	//			{
-	//				v2f o;
-	//				o.uv = v.texcoord;
-	//				o.clipPos = UnityObjectToClipPos(v.vertex);
-	//				o.screenPos = ComputeScreenPos(o.clipPos);
-	//				o.normal = v.normal;
-	//				o.viewDir = ObjSpaceViewDir(v.vertex);
-	//				COMPUTE_EYEDEPTH(o.screenPos.z);
-	//				return o;
-	//			}
-
-	//			half4 frag(v2f i) : COLOR
-	//			{					
-	//				float4 refColor = float4(1, 1, 1, 1);
-	//				float edgeDepth = 0;
-
-	//				//通过深度纹理查询岸边与水里
-	//				{//1-0 : 水里-岸边
-	//					edgeDepth = tex2Dproj(_CameraDepthTexture, i.screenPos).r;
-	//					edgeDepth = LinearEyeDepth(edgeDepth) - i.screenPos.z;
-	//				}
-
-	//				float offset = _Time.x * 0.1f;
-	//				float2 normalUV = i.uv* _WaterNormal_ST.xy + _WaterNormal_ST.zw;
-	//				float4 normal = tex2D(_WaterNormal, normalUV + float2(offset,-offset));
-	//				float4 uvPos = i.screenPos +normal * edgeDepth;
-
-	//				//计算反射与折射
-	//				{
-	//					float4 uv1 = uvPos;
-	//					half4 refl = tex2Dproj(_ReflectionTex, UNITY_PROJ_COORD(uv1));
-
-	//					float4 uv2 = uvPos;
-	//					half4 refr = tex2Dproj(_RefractionTex, UNITY_PROJ_COORD(uv2));
-
-	//					float3 viewDir = normalize(i.viewDir);
-	//					float fresnel = saturate(dot(viewDir, normalize(i.normal)));
-
-	//					switch (_WaterDisplayMode)
-	//					{
-	//					case 0:
-	//						refColor *= lerp(refl, refr, fresnel);
-	//						break;
-	//					case 1:
-	//						refColor *= refl;
-	//						break;
-	//					case 2:
-	//						refColor *= refr;
-	//						break;
-	//					}
-	//				}	
-
-	//				float4 color = _WaterColor;
-	//				color.a *= saturate(edgeDepth);
-	//				return color * refColor;
-	//			}
-	//			ENDCG
-	//	}
-	//}
 }
