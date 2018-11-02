@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
+
 // Upgrade NOTE: replaced 'defined WATER_REFLECTIVE' with 'defined (WATER_REFLECTIVE)'
 
 Shader "Effect/Water/Water (Static)"
@@ -65,19 +67,20 @@ Shader "Effect/Water/Water (Static)"
 					return depth;
 				}				
 
-				v2f vert(appdata_base v)
+				v2f vert(appdata_full v)
 				{
 					v2f o;
 					o.uv = v.texcoord;
 					o.clipPos = UnityObjectToClipPos(v.vertex);
-					o.screenPos = ComputeScreenPos(o.clipPos);
-					o.normal = v.normal;
+					o.screenPos = ComputeScreenPos(o.clipPos);					
 					o.viewDir = ObjSpaceViewDir(v.vertex);
+					o.normal = v.normal;
 					COMPUTE_EYEDEPTH(o.screenPos.z);
 #if UNITY_UV_STARTS_AT_TOP
 					o.screenPos.y = (o.clipPos.w - o.clipPos.y) * 0.5;
 #endif
 					o.wave = v.vertex.xzxz * float4(1,1,1,1) / 1.0 + float4(0.1,0.2,0.3,0.4) * _Time.y * 0.1;
+
 					return o;
 				}
 
@@ -111,6 +114,7 @@ Shader "Effect/Water/Water (Static)"
 					color *= refr;
 #endif
 					float depth = GetLinearEyeDepthDiff(i);
+
 					return color;
 				}
 				ENDCG
