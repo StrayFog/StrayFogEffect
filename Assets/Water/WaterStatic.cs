@@ -85,6 +85,7 @@ public class WaterStatic : MonoBehaviour
         #endregion
 
         #region 是否绘制反射
+        SetReflective();
         if (useReflective)
         {
             if (mReflectiveCamera == null)
@@ -115,6 +116,7 @@ public class WaterStatic : MonoBehaviour
         #endregion
 
         #region 是否绘制折射
+        SetRefractive();
         if (useRefractive)
         {
             if (mRefractiveCamera == null)
@@ -144,6 +146,39 @@ public class WaterStatic : MonoBehaviour
         }
         #endregion
         mIsRenderWater = false;
+    }
+    #endregion
+
+    #region SetReflective 设置Reflectiv宏
+    /// <summary>
+    /// 设置Reflectiv宏
+    /// </summary>
+    void SetReflective()
+    {
+        if (useReflective)
+        {
+            mWaterMaterial.EnableKeyword("WATER_REFLECTIVE");
+        }
+        else {
+            mWaterMaterial.DisableKeyword("WATER_REFLECTIVE");
+        }
+    }
+    #endregion
+
+    #region SetRefractive 设置Refractive宏
+    /// <summary>
+    /// 设置Refractive宏
+    /// </summary>
+    void SetRefractive()
+    {
+        if (useRefractive)
+        {
+            mWaterMaterial.EnableKeyword("WATER_REFRACTIVE");
+        }
+        else
+        {
+            mWaterMaterial.DisableKeyword("WATER_REFRACTIVE");
+        }
     }
     #endregion
 }
