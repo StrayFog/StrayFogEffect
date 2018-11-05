@@ -159,17 +159,15 @@ Shader "Effect/Water/Water (Static)"
 
 			// Calculate the depth difference at the current pixel
 			float depth = GetLinearEyeDepthDiff(IN);
-			half3 bump = UnpackNormal(tex2D(_WaterNormal, SmoothNoise(IN.texcoord))).rgb;
+			half3 bump = UnpackNormal(tex2D(_WaterNormal, IN.texcoord));
 			
 #if USE_REFLECTIVE
 			float4 uv1 = IN.screenPos0;
-			uv1.xy += bump;
 			half4 refl = tex2Dproj(_ReflectionTex, UNITY_PROJ_COORD(uv1));
 #endif
 
 #if USE_REFRACTIVE
 			float4 uv2 = IN.screenPos0;
-			uv2.xy += bump;
 			half4 refr = tex2Dproj(_RefractionTex, UNITY_PROJ_COORD(uv2));
 #endif
 			float3 viewDir = normalize(IN.viewDir);
@@ -183,7 +181,7 @@ Shader "Effect/Water/Water (Static)"
 			color = refr;
 #endif
 			o.Normal = bump;
-			o.Albedo = color;			
+			o.Albedo = color;
 		}
 		ENDCG
 	}	
