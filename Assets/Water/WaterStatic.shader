@@ -47,8 +47,8 @@ Shader "Effect/Water/Water (Static)"
 	SubShader
 	{
 		Lod 400
-		Tags { "Queue" = "Transparent" "RenderType" = "Transparent"}
-
+		Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" "LightMode" = "ForwardBase"}
+		Blend SrcAlpha OneMinusSrcAlpha
 		CGPROGRAM
 		#pragma surface surf PPL vertex:vert alpha:fade
 		#pragma multi_compile WATER_REFLECTIVE
@@ -81,6 +81,7 @@ Shader "Effect/Water/Water (Static)"
 			float4 texcoord : TEXCOORD0;
 			float3 worldPos  : TEXCOORD2;	// Used to calculate the texture UVs and world view vector
 			float4 screenPos0 	 : TEXCOORD3;	// Used for depth and reflection textures
+			float3 ligthDir : TEXCOORD4;
 			float3 normal:NORMAL;
 			float3 viewDir : NORMAL1;
 		};
@@ -103,6 +104,7 @@ Shader "Effect/Water/Water (Static)"
 
 			o.viewDir = ObjSpaceViewDir(v.vertex);
 			o.normal = v.normal;
+			o.ligthDir = ObjSpaceLightDir(v.vertex);
 
 			COMPUTE_EYEDEPTH(o.screenPos0.z);
 #if UNITY_UV_STARTS_AT_TOP
@@ -112,35 +114,38 @@ Shader "Effect/Water/Water (Static)"
 
 		void surf(Input IN, inout SurfaceOutput o)
 		{
-			half4 color = tex2D(_WaterTex, IN.texcoord) * _WaterColor;
-
+			half4 outColor = tex2D(_WaterTex, IN.texcoord) * _WaterColor;
 			// Calculate the depth difference at the current pixel
-			float depth = GetLinearEyeDepthDiff(IN);
-			half3 bump = UnpackNormal(tex2D(_WaterNormal, IN.texcoord));
+			float depth = saturate(GetLinearEyeDepthDiff(IN));
 
+			float offset = sin(_Time.x);
+			half3 bump = UnpackNormal((tex2D(_WaterNormal, IN.texcoord.xy + offset))) * depth;
+			
 #if USE_REFLECTIVE
 			float4 uv1 = IN.screenPos0;
-			uv1.xy += bump.xy * depth;
+			uv1.xy += bump.xy;
 			half4 refl = tex2Dproj(_ReflectionTex, UNITY_PROJ_COORD(uv1));
 #endif
 
 #if USE_REFRACTIVE
 			float4 uv2 = IN.screenPos0;
-			uv2.xy += bump.xy * depth;
+			uv2.xy += bump.xy;
 			half4 refr = tex2Dproj(_RefractionTex, UNITY_PROJ_COORD(uv2));
 #endif
 			float3 viewDir = normalize(IN.viewDir);
 			float fresnel = saturate(dot(viewDir, normalize(IN.normal)));
 
 #if USE_REFLECTIVE && USE_REFRACTIVE
-			color *= lerp(refl, refr, fresnel);
+			outColor *= lerp(refl, refr, fresnel);
 #elif USE_REFLECTIVE
-			color *= refl;
+			outColor *= refl;
 #elif USE_REFRACTIVE
-			color *= refr;
+			outColor *= refr;
 #endif
+			/*float r = max(0, dot(bump, IN.ligthDir));
+			o.Albedo = lerp(float3(0,0,0),float3(1,1,1), r) * 10;			*/
+			o.Emission = outColor;
 			o.Alpha = depth;
-			o.Emission = color;
 		}
 		ENDCG
 	}
