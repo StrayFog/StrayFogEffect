@@ -6,6 +6,11 @@ Shader "Effect/Water/Water (Static)"
 		_WaterTex("Main Tex", 2D) = "white" {}
 		_WaterColor("Color", COLOR) = (1,1,1,1)
 		_WaterNormal("Normal Tex", 2D) = "white" {}
+		_WaterNormalDistort("Normal Distort",Range(0,1)) = 0.05
+		_WaterNormalSmooth("Normal Smooth",Range(1,5)) = 1.5
+		_WaterWaveScale("Wave Scale",Vector) = (3,3,3,3)
+		_WaterWaveOffset("Wave Offset",Vector) = (0.1,0.2,0.3,0.4)
+		_WaterWaveSpeed("Wave Speed",float) = 0.2
 
 
 		_ReflectionTex("Internal Reflection", 2D) = "white" {}
@@ -72,8 +77,13 @@ Shader "Effect/Water/Water (Static)"
 
 		sampler2D _WaterTex;
 		sampler2D _WaterNormal;
+		float4 _WaterNormal_ST;
 		float4 _WaterColor;
-
+		float _WaterNormalDistort;
+		int _WaterNormalSmooth;
+		float4 _WaterWaveScale;
+		float4 _WaterWaveOffset;
+		float _WaterWaveSpeed;
 		sampler2D _ReflectionTex;
 		sampler2D _RefractionTex;
 
@@ -107,7 +117,7 @@ Shader "Effect/Water/Water (Static)"
 			o.viewDir = ObjSpaceViewDir(v.vertex);
 			o.normal = v.normal;
 
-			o.wave = v.vertex.xzxz * float4(1, 1, 1, 1) / 1.0 + float4(0.1, 0.2, 0.3, 0.4) * _Time.y * 0.1;
+			o.wave = (v.vertex.xzxz * _WaterNormal_ST.xyxy + _WaterNormal_ST.zwzw) * _WaterWaveScale / 1.0 + _WaterWaveOffset * _Time.y * _WaterWaveSpeed;
 			COMPUTE_EYEDEPTH(o.screenPos0.z);
 #if UNITY_UV_STARTS_AT_TOP
 			o.screenPos0.y = (o.position.w - o.position.y) * 0.5;
@@ -121,10 +131,12 @@ Shader "Effect/Water/Water (Static)"
 			float depth = saturate(GetLinearEyeDepthDiff(IN));
 
 			float offset = _Time.x;
-			half3 bump1 = UnpackNormal(tex2D(_WaterNormal, IN.wave.xy)).rgb;
-			half3 bump2 = UnpackNormal(tex2D(_WaterNormal, IN.wave.zw)).rgb;
-			half3 bump = (bump1 + bump2) * 0.5;
-			//o.Normal = bump;
+			half3 bump = half3(0,0,0);
+			for (int i = 0; i < _WaterNormalSmooth; i++)
+			{
+				bump  += UnpackNormal(tex2D(_WaterNormal, IN.wave.xy)).rgb * _WaterNormalDistort;
+			}
+			o.Normal = bump;
 #if USE_REFLECTIVE
 			float4 uv1 = IN.screenPos0;
 			uv1.xy += bump.xy;
