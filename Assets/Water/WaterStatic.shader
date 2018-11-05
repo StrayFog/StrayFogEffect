@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 Shader "Effect/Water/Water (Static)"
 {
 	Properties{
@@ -81,7 +83,7 @@ Shader "Effect/Water/Water (Static)"
 			float4 texcoord : TEXCOORD0;
 			float3 worldPos  : TEXCOORD2;	// Used to calculate the texture UVs and world view vector
 			float4 screenPos0 	 : TEXCOORD3;	// Used for depth and reflection textures
-			float3 ligthDir : TEXCOORD4;
+			float4 wave:TEXCOORD4;
 			float3 normal:NORMAL;
 			float3 viewDir : NORMAL1;
 		};
@@ -104,8 +106,8 @@ Shader "Effect/Water/Water (Static)"
 
 			o.viewDir = ObjSpaceViewDir(v.vertex);
 			o.normal = v.normal;
-			o.ligthDir = ObjSpaceLightDir(v.vertex);
 
+			o.wave = v.vertex.xzxz * float4(1, 1, 1, 1) / 1.0 + float4(0.1, 0.2, 0.3, 0.4) * _Time.y * 0.1;
 			COMPUTE_EYEDEPTH(o.screenPos0.z);
 #if UNITY_UV_STARTS_AT_TOP
 			o.screenPos0.y = (o.position.w - o.position.y) * 0.5;
@@ -118,9 +120,11 @@ Shader "Effect/Water/Water (Static)"
 			// Calculate the depth difference at the current pixel
 			float depth = saturate(GetLinearEyeDepthDiff(IN));
 
-			float offset = sin(_Time.x);
-			half3 bump = UnpackNormal((tex2D(_WaterNormal, IN.texcoord.xy + offset))) * depth;
-			
+			float offset = _Time.x;
+			half3 bump1 = UnpackNormal(tex2D(_WaterNormal, IN.wave.xy)).rgb;
+			half3 bump2 = UnpackNormal(tex2D(_WaterNormal, IN.wave.zw)).rgb;
+			half3 bump = (bump1 + bump2) * 0.5;
+			//o.Normal = bump;
 #if USE_REFLECTIVE
 			float4 uv1 = IN.screenPos0;
 			uv1.xy += bump.xy;
@@ -136,15 +140,14 @@ Shader "Effect/Water/Water (Static)"
 			float fresnel = saturate(dot(viewDir, normalize(IN.normal)));
 
 #if USE_REFLECTIVE && USE_REFRACTIVE
-			outColor *= lerp(refl, refr, fresnel);
+			outColor = lerp(refl, refr, fresnel);
 #elif USE_REFLECTIVE
-			outColor *= refl;
+			outColor = refl;
 #elif USE_REFRACTIVE
-			outColor *= refr;
+			outColor = refr;
 #endif
-			/*float r = max(0, dot(bump, IN.ligthDir));
-			o.Albedo = lerp(float3(0,0,0),float3(1,1,1), r) * 10;			*/
-			o.Emission = outColor;
+			float3 edgeColor = lerp(float3(1,0,0),float3(0,0,0),depth);
+			o.Emission = outColor + edgeColor;
 			o.Alpha = depth;
 		}
 		ENDCG
