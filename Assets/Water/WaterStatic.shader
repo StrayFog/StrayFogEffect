@@ -15,14 +15,14 @@ Shader "Effect/Water/Water (Static)" {
 		_RefractionTex("Internal Refraction", 2D) = "white" {}
 	}
 
-		SubShader{
+	SubShader{
 			LOD 400
 			Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent"}
 			Blend SrcAlpha OneMinusSrcAlpha
 			
 
 		CGPROGRAM
-		#pragma surface surf Lambert vertex:vert alpha:fade
+		#pragma surface surf StandardSpecular vertex:vert alpha:fade
 
 #ifdef SHADER_API_D3D11
 		#pragma target 4.0
@@ -55,7 +55,7 @@ Shader "Effect/Water/Water (Static)" {
 
 		struct Input {
 			float2 uv_MainTex;
-			float2 uv_BumpMap;
+			float2 uv_BumpMap;			
 			float3 viewDir;
 			float4 reflUV;
 		};
@@ -71,7 +71,7 @@ Shader "Effect/Water/Water (Static)" {
 #endif
 		}
 
-		void surf(Input IN, inout SurfaceOutput o) {
+		void surf(Input IN, inout SurfaceOutputStandardSpecular o) {
 			//像素深度
 			float linearEyeDepth = 1;
 			//折射与反射混合颜色
@@ -79,13 +79,26 @@ Shader "Effect/Water/Water (Static)" {
 
 			//基础颜色
 			fixed4 texColor = tex2D(_MainTex, IN.uv_MainTex) *_Color;
+			
+			//linearEyeDepth 像素深度
+			{
+				linearEyeDepth = LinearEyeDepth(tex2Dproj(_CameraDepthTexture, IN.reflUV).r) - IN.reflUV.z;
+			}
+			linearEyeDepth = saturate(linearEyeDepth);
+
+
+			half3 bumpOffset = float3(1, 1, 1) / 1.0 + float3(0.2, 0.2, 0.2) * _Time.y * 0.1;
+			half3 uvBumpMap = UnpackNormal(tex2D(_BumpMap, IN.uv_BumpMap+ bumpOffset));
+			uvBumpMap = uvBumpMap * 2 * 0.5;
+			
 			//法线
-			o.Normal = UnpackNormal(tex2D(_BumpMap, IN.uv_BumpMap));
-					
+			//o.Normal = uvBumpMap;
+
 			//折射与反射UV纹理偏移
-			float4 reflUVOffset = o.Normal.xyzz;
+			float4 reflUVOffset = IN.reflUV;
+			reflUVOffset.xy += uvBumpMap.xy * linearEyeDepth;
 			//折射与反射UV纹理
-			float4 reflUV = IN.reflUV + reflUVOffset * pow(sin(_Time.y *0.1),2);
+			float4 reflUV = reflUVOffset;
 			
 			//Refraction Reflection 获取折射与反射颜色
 			{ 
@@ -109,13 +122,7 @@ Shader "Effect/Water/Water (Static)" {
 #endif
 			}
 
-			//linearEyeDepth 像素深度
-			{
-				linearEyeDepth = LinearEyeDepth(tex2Dproj(_CameraDepthTexture, IN.reflUV).r) - IN.reflUV.z;
-			}
-			
 			o.Emission = mixReflColor * texColor;
-			//o.Albedo = o.Emission;
 			o.Alpha = texColor.a;
 		}
 		ENDCG
