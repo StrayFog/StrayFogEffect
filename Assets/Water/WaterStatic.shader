@@ -3,6 +3,16 @@ Shader "Effect/Water/Water (Static)" {
 		_MainTex("Main Tex(RGB)", 2D) = "white" {}
 		_Color("Main Color", Color) = (1,1,1,1)
 		_BumpMap("Normalmap", 2D) = "bump" {}
+		
+		[Space(4)]
+		[Header(Tessellate Settings ___________________________________________________)]
+		[Space(4)]
+		_EdgeLength("Edge length", Range(2, 50)) = 25
+		_TessMaxDisp("Max Displacement", Float) = 20
+		_TessPhongStrength("Phong Tess Strength", Range(0, 1)) = 0.5
+		_TessHeightTex("Height Map", 2D) = "gray" {}
+		_TessNormalMap("Normal Map", 2D) = "bump" {}
+		_TessDisplacement("Displacement", Range(0, 1.0)) = 0.3
 
 		[Space(4)]
 		[Header(Reflection Settings ___________________________________________________)]
@@ -22,8 +32,11 @@ Shader "Effect/Water/Water (Static)" {
 			
 
 		CGPROGRAM
-		#pragma surface surf StandardSpecular vertex:vert alpha:fade
+		#include "UnityCG.cginc"
+		#include "Tessellation.cginc"
 
+		#pragma surface surf StandardSpecular vertex:vert tessellate:tessFunction tessphong:_TessPhongStrength alpha:fade
+		
 #ifdef SHADER_API_D3D11
 		#pragma target 4.0
 #else
@@ -53,14 +66,52 @@ Shader "Effect/Water/Water (Static)" {
 		sampler2D _BumpMap;
 		fixed4 _Color;
 
+		float _EdgeLength;
+		float _TessMaxDisp;
+		float _TessPhongStrength;
+		sampler2D _TessHeightTex;
+		float _TessDisplacement;
+		sampler2D _TessNormalMap;
+		
+
 		struct Input {
 			float2 uv_MainTex;
-			float2 uv_BumpMap;			
+			float2 uv_BumpMap;	
+			float2 uv_TessNormalMap;
 			float3 viewDir;
 			float4 reflUV;
+			float4 screenPos;
 		};
 
-		void vert(inout appdata_full v, out Input o)
+		float4 tessFunction(appdata_full v0, appdata_full v1, appdata_full v2)
+		{
+			return UnityEdgeLengthBasedTessCull(v0.vertex, v1.vertex, v2.vertex, _EdgeLength, _TessMaxDisp);
+		}
+		void vert(inout appdata_full v)
+		{
+			float d = tex2Dlod(_TessHeightTex, float4(v.texcoord.xy, 0, 0)).r * _TessDisplacement;
+			v.vertex.xyz += v.normal * d;
+		}
+
+		void surf(Input IN, inout SurfaceOutputStandardSpecular o) {
+			half4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
+
+			float linearEyeDepth = 1;
+			//linearEyeDepth œÒÀÿ…Ó∂»
+			{
+				linearEyeDepth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2Dproj(_CameraDepthTexture, IN.screenPos))) - IN.screenPos.w;
+			}
+			linearEyeDepth = saturate(linearEyeDepth);
+
+			//o.Emission = c.rgb;
+			o.Albedo = c.rgb * linearEyeDepth;
+			o.Specular = 0.2;
+			o.Alpha = c.a;
+			//o.Gloss = 1.0;
+			o.Normal = UnpackNormal(tex2D(_TessNormalMap, IN.uv_TessNormalMap));
+		}
+
+		/*void vert(inout appdata_full v, out Input o)
 		{
 			UNITY_INITIALIZE_OUTPUT(Input, o);
 			float4 position = UnityObjectToClipPos(v.vertex);
@@ -125,6 +176,7 @@ Shader "Effect/Water/Water (Static)" {
 			o.Emission = mixReflColor * texColor;
 			o.Alpha = texColor.a;
 		}
+		*/
 		ENDCG
 	}
 	FallBack "Standard"
