@@ -1,4 +1,7 @@
-﻿#define NUM_STEPS int(8)
+﻿#ifndef UNITY_CG_INCLUDED
+#define UNITY_CG_INCLUDED
+
+#define NUM_STEPS int(8)
 #define PI float(3.141592)
 #define EPSILON float(1e-3)
 #define EPSILON_NRM (0.1 / _ScreenParams.x)
@@ -164,34 +167,35 @@ float heightMapTracing(float3 ori, float3 dir, out float3 p) {
 	return tmid;
 }
 
-/*
-float2 uv = IN.texcoord.xy - 1.5;
-			float time = _Time.x * 0.3;
+void SeascapeSurf(inout appdata_full v, out Input o)
+{
+	float2 uv = IN.texcoord.xy - 1.5;
+	float time = _Time.x * 0.3;
 
-			// ray
-			float3 ang = float3(sin(time*3.0)*0.1, sin(time)*0.2 + 0.3, time);
-			float3 ori = float3(0.0, 3.5, time*5.0);
-			float3 dir = normalize(float3(uv.xy, -2.0)); dir.z += length(uv) * 0.15;
-			dir = mul(normalize(dir) , fromEuler(ang));
+	// ray
+	float3 ang = float3(sin(time*3.0)*0.1, sin(time)*0.2 + 0.3, time);
+	float3 ori = float3(0.0, 3.5, time*5.0);
+	float3 dir = normalize(float3(uv.xy, -2.0)); dir.z += length(uv) * 0.15;
+	dir = mul(normalize(dir), fromEuler(ang));
 
-			// tracing
-			float3 p;
-			heightMapTracing(ori, dir, p);
-			float3 dist = p - ori;
-			float3 n = getNormal(p, dot(dist, dist) * EPSILON_NRM);
-			float3 light = normalize(float3(0.0, 1.0, 0.8));
+	// tracing
+	float3 p;
+	heightMapTracing(ori, dir, p);
+	float3 dist = p - ori;
+	float3 n = getNormal(p, dot(dist, dist) * EPSILON_NRM);
+	float3 light = normalize(float3(0.0, 1.0, 0.8));
 
-			// color
-			float3 color = lerp(
-				getSkyColor(dir),
-				getSeaColor(p, n, light, dir, dist),
-				pow(smoothstep(0.0, -0.05, dir.y), 0.3));
+	// color
+	float3 color = lerp(
+		getSkyColor(dir),
+		getSeaColor(p, n, light, dir, dist),
+		pow(smoothstep(0.0, -0.05, dir.y), 0.3));
 
-			// post
-			color.x = pow(color.x, 0.75);
-			color.y = pow(color.y, 0.75);
-			color.z = pow(color.z, 0.75);
+	// post
+	color.x = pow(color.x, 0.75);
+	color.y = pow(color.y, 0.75);
+	color.z = pow(color.z, 0.75);
 
-			float4 fragColor = float4(color.x, color.y, color.z, 1.0);
-			o.Albedo = fragColor;
-*/
+	float4 fragColor = float4(color.x, color.y, color.z, 1.0);
+	o.Albedo = fragColor;
+}

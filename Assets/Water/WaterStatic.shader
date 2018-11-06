@@ -1,167 +1,124 @@
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-Shader "Effect/Water/Water (Static)"
-{
+Shader "Effect/Water/Water (Static)" {
 	Properties{
-		_WaterTex("Main Tex", 2D) = "white" {}
-		_WaterColor("Color", COLOR) = (1,1,1,1)
-		_WaterNormal("Normal Tex", 2D) = "white" {}
-		_WaterNormalDistort("Normal Distort",Range(0,1)) = 0.05
-		_WaterNormalSmooth("Normal Smooth",Range(1,5)) = 1.5
-		_WaterWaveScale("Wave Scale",Vector) = (3,3,3,3)
-		_WaterWaveOffset("Wave Offset",Vector) = (0.1,0.2,0.3,0.4)
-		_WaterWaveSpeed("Wave Speed",float) = 0.2
+		_MainTex("Main Tex(RGB)", 2D) = "white" {}
+		_Color("Main Color", Color) = (1,1,1,1)
+		_BumpMap("Normalmap", 2D) = "bump" {}
 
-
+		[Space(4)]
+		[Header(Reflection Settings ___________________________________________________)]
+		[Space(4)]
 		_ReflectionTex("Internal Reflection", 2D) = "white" {}
+
+		[Space(4)]
+		[Header(Refraction Settings ___________________________________________________)]
+		[Space(4)]
 		_RefractionTex("Internal Refraction", 2D) = "white" {}
 	}
 
-		CGINCLUDE
-#ifdef SHADER_API_D3D11
-#pragma target 4.0
-#else
-#pragma target 3.0
-#endif
-#include "UnityCG.cginc"
-		half4 _Specular;
+		SubShader{
+			LOD 400
+			Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent"}
+			Blend SrcAlpha OneMinusSrcAlpha
+			
 
-	half4 LightingPPL(SurfaceOutput s, half3 lightDir, half3 viewDir, half atten)
-	{
-		half3 nNormal = normalize(s.Normal);
-		half shininess = s.Gloss * 250.0 + 4.0;
-
-#ifndef USING_DIRECTIONAL_LIGHT
-		lightDir = normalize(lightDir);
-#endif
-		// Phong shading model
-		half reflectiveFactor = max(0.0, dot(-viewDir, reflect(lightDir, nNormal)));
-
-		// Blinn-Phong shading model
-		//half reflectiveFactor = max(0.0, dot(nNormal, normalize(lightDir + viewDir)));
-
-		half diffuseFactor = max(0.0, dot(nNormal, lightDir));
-		half specularFactor = pow(reflectiveFactor, shininess) * s.Specular;
-
-		half4 c;
-		c.rgb = (s.Albedo * diffuseFactor + _Specular.rgb * specularFactor) * _LightColor0.rgb;
-		c.rgb *= (atten * 2.0);
-		c.a = s.Alpha;
-		return c;
-	}
-	ENDCG
-
-	SubShader
-	{
-		Lod 400
-		Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" "LightMode" = "ForwardBase"}
-		Blend SrcAlpha OneMinusSrcAlpha
 		CGPROGRAM
-		#pragma surface surf PPL vertex:vert alpha:fade
+		#pragma surface surf Lambert vertex:vert alpha:fade
+
+#ifdef SHADER_API_D3D11
+		#pragma target 4.0
+#else
+		#pragma target 3.0
+#endif
+
 		#pragma multi_compile WATER_REFLECTIVE
 		#pragma multi_compile WATER_REFRACTIVE
 
 #if defined (WATER_REFLECTIVE)
-	#define USE_REFLECTIVE 1
+		#define USE_REFLECTIVE 1
 #else
-	#define USE_REFLECTIVE 0
+		#define USE_REFLECTIVE 0
 #endif
 
 #if defined (WATER_REFRACTIVE)
-	#define USE_REFRACTIVE 1
+		#define USE_REFRACTIVE 1
 #else
-	#define USE_REFRACTIVE 0
+		#define USE_REFRACTIVE 0
 #endif
 
 		sampler2D _CameraDepthTexture;
-
-		sampler2D _WaterTex;
-		sampler2D _WaterNormal;
-		float4 _WaterNormal_ST;
-		float4 _WaterColor;
-		float _WaterNormalDistort;
-		int _WaterNormalSmooth;
-		float4 _WaterWaveScale;
-		float4 _WaterWaveOffset;
-		float _WaterWaveSpeed;
 		sampler2D _ReflectionTex;
 		sampler2D _RefractionTex;
 
-		struct Input
-		{
-			float4 position  : POSITION;
-			float4 texcoord : TEXCOORD0;
-			float3 worldPos  : TEXCOORD2;	// Used to calculate the texture UVs and world view vector
-			float4 screenPos0 	 : TEXCOORD3;	// Used for depth and reflection textures
-			float4 wave:TEXCOORD4;
-			float3 normal:NORMAL;
-			float3 viewDir : NORMAL1;
-		};
+		sampler2D _MainTex;
+		sampler2D _BumpMap;
+		fixed4 _Color;
 
-		//获得LinearEyeDepth深度差，差值代表从水到陆地的深度过度
-		float GetLinearEyeDepthDiff(Input IN)
-		{
-			float depth = tex2Dproj(_CameraDepthTexture, IN.screenPos0).r;
-			depth = LinearEyeDepth(depth);
-			depth -= IN.screenPos0.z;
-			return depth;
-		}
+		struct Input {
+			float2 uv_MainTex;
+			float2 uv_BumpMap;
+			float3 viewDir;
+			float4 reflUV;
+		};
 
 		void vert(inout appdata_full v, out Input o)
 		{
-			o.texcoord = v.texcoord;
-			o.worldPos = v.vertex.xyz;
-			o.position = UnityObjectToClipPos(v.vertex);
-			o.screenPos0 = ComputeScreenPos(o.position);
-
-			o.viewDir = ObjSpaceViewDir(v.vertex);
-			o.normal = v.normal;
-
-			o.wave = (v.vertex.xzxz * _WaterNormal_ST.xyxy + _WaterNormal_ST.zwzw) * _WaterWaveScale / 1.0 + _WaterWaveOffset * _Time.y * _WaterWaveSpeed;
-			COMPUTE_EYEDEPTH(o.screenPos0.z);
+			UNITY_INITIALIZE_OUTPUT(Input, o);
+			float4 position = UnityObjectToClipPos(v.vertex);
+			o.reflUV = ComputeScreenPos(position);
+			COMPUTE_EYEDEPTH(o.reflUV.z);
 #if UNITY_UV_STARTS_AT_TOP
-			o.screenPos0.y = (o.position.w - o.position.y) * 0.5;
+			o.reflUV.y = (position.w - position.y) * 0.5;
 #endif
 		}
 
-		void surf(Input IN, inout SurfaceOutput o)
-		{
-			half4 outColor = tex2D(_WaterTex, IN.texcoord) * _WaterColor;
-			// Calculate the depth difference at the current pixel
-			float depth = saturate(GetLinearEyeDepthDiff(IN));
+		void surf(Input IN, inout SurfaceOutput o) {
+			//像素深度
+			float linearEyeDepth = 1;
+			//折射与反射混合颜色
+			fixed4 mixReflColor = fixed4(1, 1, 1, 1);
 
-			float offset = _Time.x;
-			half3 bump = half3(0,0,0);
-			for (int i = 0; i < _WaterNormalSmooth; i++)
-			{
-				bump  += UnpackNormal(tex2D(_WaterNormal, IN.wave.xy)).rgb * _WaterNormalDistort;
-			}
-			o.Normal = bump;
+			//基础颜色
+			fixed4 texColor = tex2D(_MainTex, IN.uv_MainTex) *_Color;
+			//法线
+			o.Normal = UnpackNormal(tex2D(_BumpMap, IN.uv_BumpMap));
+					
+			//折射与反射UV纹理偏移
+			float4 reflUVOffset = o.Normal.xyzz;
+			//折射与反射UV纹理
+			float4 reflUV = IN.reflUV + reflUVOffset * pow(sin(_Time.y *0.1),2);
+			
+			//Refraction Reflection 获取折射与反射颜色
+			{ 
 #if USE_REFLECTIVE
-			float4 uv1 = IN.screenPos0;
-			uv1.xy += bump.xy;
-			half4 refl = tex2Dproj(_ReflectionTex, UNITY_PROJ_COORD(uv1));
+				fixed4 reflcol = tex2Dproj(_ReflectionTex, UNITY_PROJ_COORD(reflUV));
 #endif
 
 #if USE_REFRACTIVE
-			float4 uv2 = IN.screenPos0;
-			uv2.xy += bump.xy;
-			half4 refr = tex2Dproj(_RefractionTex, UNITY_PROJ_COORD(uv2));
+				fixed4 refrcol = tex2Dproj(_RefractionTex, UNITY_PROJ_COORD(reflUV));
 #endif
-			float3 viewDir = normalize(IN.viewDir);
-			float fresnel = saturate(dot(viewDir, normalize(IN.normal)));
 
+				
 #if USE_REFLECTIVE && USE_REFRACTIVE
-			outColor = lerp(refl, refr, fresnel);
+				float3 viewDir = normalize(IN.viewDir);
+				float mixReflFresnel = saturate(dot(viewDir, normalize(o.Normal)));
+				mixReflColor = lerp(reflcol, refrcol, mixReflFresnel);
 #elif USE_REFLECTIVE
-			outColor = refl;
+				mixReflColor = reflcol;
 #elif USE_REFRACTIVE
-			outColor = refr;
+				mixReflColor = refrcol;
 #endif
-			float3 edgeColor = lerp(float3(1,0,0),float3(0,0,0),depth);
-			o.Emission = outColor + edgeColor;
-			o.Alpha = depth;
+			}
+
+			//linearEyeDepth 像素深度
+			{
+				linearEyeDepth = LinearEyeDepth(tex2Dproj(_CameraDepthTexture, IN.reflUV).r) - IN.reflUV.z;
+			}
+			
+			o.Emission = mixReflColor * texColor;
+			//o.Albedo = o.Emission;
+			o.Alpha = texColor.a;
 		}
 		ENDCG
 	}
+	FallBack "Standard"
 }
