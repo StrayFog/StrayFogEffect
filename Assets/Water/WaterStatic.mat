@@ -31,7 +31,7 @@ Material:
         m_Scale: {x: 1, y: 3}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 2800000, guid: 12252a7808645b84782d79ff7a7c6841, type: 3}
+        m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Cube:
@@ -48,6 +48,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _DetailNormalMap:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DispTex:
+        m_Texture: {fileID: 2800000, guid: 3b6787cffd0a4434796a5ee04144e381, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
@@ -69,6 +73,10 @@ Material:
     - _Noise:
         m_Texture: {fileID: 2800000, guid: cb8a31e22f3929c4390f49a01f3fca0f, type: 3}
         m_Scale: {x: 2, y: 2}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
+        m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
@@ -99,6 +107,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _TessDispTex:
+        m_Texture: {fileID: 2800000, guid: 3b6787cffd0a4434796a5ee04144e381, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TessHeightMap:
         m_Texture: {fileID: 2800000, guid: 3b6787cffd0a4434796a5ee04144e381, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -140,6 +152,7 @@ Material:
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
+    - _Displacement: 0.3
     - _Distortion: 0.03
     - _DstBlend: 0
     - _EdgeLength: 25
@@ -171,8 +184,12 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _Tess: 4
     - _TessDisplacement: 0.1
+    - _TessEdgeLength: 25
+    - _TessHeightDisplacement: 0.3
     - _TessMaxDisp: 11
+    - _TessNormalDisplacement: 0.3
     - _TessPhongStrength: 0.5
     - _Tiling: 0.025
     - _UVSec: 0
@@ -196,7 +213,7 @@ Material:
     - _BigCascadeColor: {r: 20, g: 20, b: 20, a: 0}
     - _BigCascadeMainSpeed: {r: 0, g: 0.35, b: 0, a: 0}
     - _BigCascadeMixSpeed: {r: 0.01, g: 0.1, b: 0, a: 0}
-    - _Color: {r: 1, g: 0.9575472, b: 0.9575472, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _Color0: {r: 0.5764706, g: 0.94509804, b: 1, a: 1}
     - _Color1: {r: 0, g: 0.1254902, b: 0.21568628, a: 0}
     - _DeepColor: {r: 0.05882353, g: 0.09411765, b: 0.23529412, a: 0}
