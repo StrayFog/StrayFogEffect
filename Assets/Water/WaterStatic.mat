@@ -135,7 +135,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _WaterTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _texcoord:
@@ -174,9 +174,9 @@ Material:
     - _NormalScale: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _ReflectionTint: 1
+    - _ReflectionTint: 0.6923077
     - _RefractAmount: 1
-    - _RefractDistortion: 100
+    - _RefractDistortion: 200
     - _RefractRatio: 1
     - _ShalowDepth: 0.7
     - _ShalowFalloff: -1.2
@@ -199,12 +199,12 @@ Material:
     - _TessMaxDisp: 11
     - _TessNormalDisplacement: 0.3
     - _TessPhongStrength: 0.5
-    - _Tiling: 0.025
+    - _Tiling: 0.09769231
     - _UVSec: 0
     - _UVVDirection1UDirection0: 0
     - _WaterAngle: 0
     - _WaterDeepTranslucencyPower: 0.1
-    - _WaterDepth: 0.084
+    - _WaterDepth: 0.178
     - _WaterDirection: 0
     - _WaterDistort: 1
     - _WaterFalloffBorder: 8.46
@@ -227,7 +227,7 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _Color0: {r: 0.5764706, g: 0.94509804, b: 1, a: 1}
     - _Color1: {r: 0, g: 0.1254902, b: 0.21568628, a: 0}
-    - _DeepColor: {r: 0.05882353, g: 0.09411765, b: 0.23529412, a: 1}
+    - _DeepColor: {r: 0, g: 0.11320758, b: 0.5660378, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FoamColor: {r: 20, g: 20, b: 20, a: 0}
     - _FoamSpeed: {r: -0.001, g: 0.018, b: 0, a: 0}
@@ -237,7 +237,7 @@ Material:
     - _GFrequency: {r: 1.3, g: 1.35, b: 1.25, a: 1.25}
     - _GSpeed: {r: 1.2, g: 1.375, b: 1.1, a: 1.5}
     - _GSteepness: {r: 1, g: 1, b: 1, a: 1}
-    - _InvRanges: {r: 1, g: 0.17, b: 0.17, a: 0}
+    - _InvRanges: {r: 0.53, g: 0.16, b: 0.47, a: 0}
     - _NoiseSpeed: {r: -0.1, g: -0.3, b: 0, a: 0}
     - _ReflColor: {r: 1, g: 1, b: 1, a: 1}
     - _ReflectColor: {r: 1, g: 1, b: 1, a: 0.5}
