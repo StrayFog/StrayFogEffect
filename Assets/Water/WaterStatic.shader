@@ -1,131 +1,96 @@
-Shader "Effect/Water/Water (Static)" {
+Shader "Effect/Water/Water (Static)"
+{
 	Properties{
-		_MainTex("Main Tex(RGB)", 2D) = "white" {}
-		_Color("Main Color", Color) = (1,1,1,1)
-		_BumpMap("Normalmap", 2D) = "bump" {}
-
-		[Space(4)]
-		[Header(Reflection Settings ___________________________________________________)]
-		[Space(4)]
-		_ReflectionTex("Internal Reflection", 2D) = "white" {}
-
-		[Space(4)]
-		[Header(Refraction Settings ___________________________________________________)]
-		[Space(4)]
-		_RefractionTex("Internal Refraction", 2D) = "white" {}
+		_WaterNormal("Normal Map (RGB), Foam (A)", 2D) = "white" {}
+		_RefractDistortion("Refract Distortion", Range(0, 1000)) = 100  //控制模拟折射时图像的扭曲程度
+		_RefractRatio("Refract Ratio",Range(0.1,1)) = 0.5 //控制模拟折射率
 	}
 
-		SubShader{
-				LOD 400
+		// -----------------------------------------------------------
+		// Fragment program cards
+			Subshader{
 				Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent"}
 				Blend SrcAlpha OneMinusSrcAlpha
+				
+				GrabPass { "_RefractionTex" }
+				Pass {
+					CGPROGRAM
+					#pragma 4.6
+					#pragma vertex vert
+					#pragma fragment frag
+					#pragma fragmentoption ARB_precision_hint_fastest 
+					#include "UnityCG.cginc"					
 
+					sampler2D _CameraDepthTexture;
 
-			CGPROGRAM
-			#pragma surface surf StandardSpecular vertex:vert alpha:fade
+					sampler2D _RefractionTex;
+					float4 _RefractionTex_TexelSize;
 
-	#ifdef SHADER_API_D3D11
-			#pragma target 4.0
-	#else
-			#pragma target 3.0
-	#endif
+					sampler2D _WaterNormal;
+					float4 _WaterNormal_ST;
 
-			#pragma multi_compile WATER_REFLECTIVE
-			#pragma multi_compile WATER_REFRACTIVE
+					float _RefractDistortion;
+					float _RefractRatio;
 
-	#if defined (WATER_REFLECTIVE)
-			#define USE_REFLECTIVE 1
-	#else
-			#define USE_REFLECTIVE 0
-	#endif
+					struct v2f {
+						float4 pos : SV_POSITION;
+						float4 scrPos : TEXCOORD0;
+						float4 uv : TEXCOORD1;
+						float4 TtoW0 : TEXCOORD2;
+						float4 TtoW1 : TEXCOORD3;
+						float4 TtoW2 : TEXCOORD4;
+					};
 
-	#if defined (WATER_REFRACTIVE)
-			#define USE_REFRACTIVE 1
-	#else
-			#define USE_REFRACTIVE 0
-	#endif
+					v2f vert(appdata_full v)
+					{
+						v2f o;
+						o.pos = UnityObjectToClipPos(v.vertex);
+						//得到对应被抓取的屏幕图像的采样坐标
+						o.scrPos = ComputeGrabScreenPos(o.pos);
+						COMPUTE_EYEDEPTH(o.scrPos.z);
 
-			sampler2D _CameraDepthTexture;
-			sampler2D _ReflectionTex;
-			sampler2D _RefractionTex;
+						o.uv.xy = TRANSFORM_TEX(v.texcoord, _WaterNormal);
 
-			sampler2D _MainTex;
-			sampler2D _BumpMap;
-			fixed4 _Color;
+						float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+						fixed3 worldNormal = UnityObjectToWorldNormal(v.normal);
+						fixed3 worldTangent = UnityObjectToWorldDir(v.tangent.xyz);
+						fixed3 worldBinormal = cross(worldNormal, worldTangent) * v.tangent.w;						
 
-			struct Input {
-				float2 uv_MainTex;
-				float2 uv_BumpMap;
-				float3 viewDir;
-				float4 reflUV;
-			};
+						//切线空间到世界空间的变换矩阵
+						o.TtoW0 = float4(worldTangent.x, worldBinormal.x, worldNormal.x, worldPos.x);
+						o.TtoW1 = float4(worldTangent.y, worldBinormal.y, worldNormal.y, worldPos.y);
+						o.TtoW2 = float4(worldTangent.z, worldBinormal.z, worldNormal.z, worldPos.z);
+						return o;
+					}
 
-			void vert(inout appdata_full v, out Input o)
-			{
-				UNITY_INITIALIZE_OUTPUT(Input, o);
-				float4 position = UnityObjectToClipPos(v.vertex);
-				o.reflUV = ComputeScreenPos(position);
-				COMPUTE_EYEDEPTH(o.reflUV.z);
-	#if UNITY_UV_STARTS_AT_TOP
-				o.reflUV.y = (position.w - position.y) * 0.5;
-	#endif
+					half4 frag(v2f i) : COLOR
+					{
+						float3 worldPos = float3(i.TtoW0.w, i.TtoW1.w, i.TtoW2.w);
+						fixed3 worldViewDir = normalize(UnityWorldSpaceViewDir(worldPos));
+
+						fixed3 bump = UnpackNormal(tex2D(_WaterNormal, i.uv.xy));
+						fixed3 worldNormal = normalize(half3(dot(i.TtoW0.xyz, bump), dot(i.TtoW1.xyz, bump), dot(i.TtoW2.xyz, bump)));
+						
+						//linearEyeDepth 像素深度
+						float linearEyeDepth = 1;
+						{
+							linearEyeDepth = LinearEyeDepth(tex2Dproj(_CameraDepthTexture, i.scrPos).r) - i.scrPos.z;
+						}
+						linearEyeDepth = saturate(linearEyeDepth);
+
+						//对屏幕图像的采样坐标进行偏移
+						//选择使用切线空间下的法线方向来进行偏移是因为该空间下的法线可以反映顶点局部空间下的法线方向
+						fixed2 offset = bump * _RefractDistortion * _RefractionTex_TexelSize;
+						//对scrPos偏移后再透视除法得到真正的屏幕坐标
+						float4 uv = i.scrPos + float4(offset,0,0) * linearEyeDepth;// / ;
+
+						half4 refraction = tex2Dproj(_RefractionTex, UNITY_PROJ_COORD(uv/ i.scrPos.w));
+
+						refraction *= linearEyeDepth;
+						refraction.a = 1;
+						return refraction;
+					}
+					ENDCG
 			}
-
-			void surf(Input IN, inout SurfaceOutputStandardSpecular o) {
-				//像素深度
-				float linearEyeDepth = 1;
-				//折射与反射混合颜色
-				fixed4 mixReflColor = fixed4(1, 1, 1, 1);
-
-				//基础颜色
-				fixed4 texColor = tex2D(_MainTex, IN.uv_MainTex) *_Color;
-
-				//linearEyeDepth 像素深度
-				{
-					linearEyeDepth = LinearEyeDepth(tex2Dproj(_CameraDepthTexture, IN.reflUV).r) - IN.reflUV.z;
-				}
-				linearEyeDepth = saturate(linearEyeDepth);
-
-
-				half3 bumpOffset = float3(1, 1, 1) / 1.0 + float3(0.2, 0.2, 0.2) * _Time.y * 0.1;
-				half3 uvBumpMap = UnpackNormal(tex2D(_BumpMap, IN.uv_BumpMap + bumpOffset));
-				uvBumpMap = uvBumpMap * 2 * 0.5;
-
-				//法线
-				//o.Normal = uvBumpMap;
-
-				//折射与反射UV纹理偏移
-				float4 reflUVOffset = IN.reflUV;
-				reflUVOffset.xy += uvBumpMap.xy * linearEyeDepth;
-				//折射与反射UV纹理
-				float4 reflUV = reflUVOffset;
-
-				//Refraction Reflection 获取折射与反射颜色
-				{
-	#if USE_REFLECTIVE
-					fixed4 reflcol = tex2Dproj(_ReflectionTex, UNITY_PROJ_COORD(reflUV));
-	#endif
-
-	#if USE_REFRACTIVE
-					fixed4 refrcol = tex2Dproj(_RefractionTex, UNITY_PROJ_COORD(reflUV));
-	#endif
-
-
-	#if USE_REFLECTIVE && USE_REFRACTIVE
-					float3 viewDir = normalize(IN.viewDir);
-					float mixReflFresnel = saturate(dot(viewDir, normalize(o.Normal)));
-					mixReflColor = lerp(reflcol, refrcol, mixReflFresnel);
-	#elif USE_REFLECTIVE
-					mixReflColor = reflcol;
-	#elif USE_REFRACTIVE
-					mixReflColor = refrcol;
-	#endif
-				}
-
-				o.Emission = mixReflColor * texColor;
-				o.Alpha = texColor.a;
-			}
-			ENDCG
-	}
-		FallBack "Standard"
+		}
 }

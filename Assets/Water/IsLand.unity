@@ -203,8 +203,8 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 59386580}
-  m_LocalRotation: {x: -0.08015584, y: 0.9181515, z: 0.24375741, w: 0.3019192}
-  m_LocalPosition: {x: 0.0488246, y: 0.33632958, z: 1.6255709}
+  m_LocalRotation: {x: -0.16397695, y: 0.51259923, z: 0.100445256, w: 0.836818}
+  m_LocalPosition: {x: -0.13869475, y: 0.09778396, z: -0.9466488}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1910853873}
@@ -230,8 +230,8 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.39029664
-  far clip plane: 78059.33
+  near clip plane: 0.50366664
+  far clip plane: 100733.336
   field of view: 53.037933
   orthographic: 0
   orthographic size: 5
@@ -413,8 +413,8 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 543208716}
-  m_LocalRotation: {x: 0.08015552, y: 0.9181515, z: -0.24375755, w: 0.30191913}
-  m_LocalPosition: {x: 0.0488246, y: 0.33632958, z: 1.6255709}
+  m_LocalRotation: {x: 0.16397688, y: 0.51259923, z: -0.10044535, w: 0.836818}
+  m_LocalPosition: {x: -0.13869475, y: 0.09778396, z: -0.9466488}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1910853873}
@@ -440,8 +440,8 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.39029664
-  far clip plane: 78059.33
+  near clip plane: 0.50366664
+  far clip plane: 100733.336
   field of view: 53.037933
   orthographic: 0
   orthographic size: 5
@@ -866,6 +866,91 @@ Mesh:
   m_MeshMetrics[0]: 100.000015
   m_MeshMetrics[1]: 1
   m_MeshOptimized: 0
+--- !u!1 &1371023765
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1371023769}
+  - component: {fileID: 1371023768}
+  - component: {fileID: 1371023767}
+  - component: {fileID: 1371023766}
+  m_Layer: 0
+  m_Name: Cube
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!65 &1371023766
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1371023765}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!23 &1371023767
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1371023765}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 4294967295
+  m_Materials:
+  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+--- !u!33 &1371023768
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1371023765}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &1371023769
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1371023765}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 134.7, y: 6.26, z: 106.57}
+  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1696680342
 GameObject:
   m_ObjectHideFlags: 0
