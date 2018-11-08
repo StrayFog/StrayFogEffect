@@ -143,8 +143,9 @@ Shader "Effect/Water/Water (Static)"
 				half4 waterColor = lerp(_DeepColor, _ShallowColor, d);
 				waterColor *= refractionColor;
 
-				//o.Albedo = IN.vertexColor * linearEyeDepth;
-				o.Emission = waterColor;
+				//o.Albedo = IN.vertexColor * linearEyeDepth; Emission
+				o.Albedo = waterColor;
+				//o.Emission = waterColor;
 				o.Alpha = 1;
 
 				//o.Normal = UnpackNormal(tex2D(_TessNormalMap, IN.uv_TessNormalMap));
