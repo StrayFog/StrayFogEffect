@@ -38,6 +38,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Cubemap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -149,11 +153,12 @@ Material:
     - _BigCascadeSpecular: 0.84
     - _BigCascadeTransparency: 0.002
     - _BigCascadeWaterTessScale: 0.7
+    - _BumpAmt: 10
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _Displacement: 0.3
-    - _Distortion: 0.03
+    - _Distortion: 1000
     - _DstBlend: 0
     - _EdgeLength: 25
     - _FlowSpeed: 0.3
@@ -170,6 +175,9 @@ Material:
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _ReflectionTint: 1
+    - _RefractAmount: 1
+    - _RefractDistortion: 100
+    - _RefractRatio: 1
     - _ShalowDepth: 0.7
     - _ShalowFalloff: -1.2
     - _Shininess: 1
@@ -194,8 +202,10 @@ Material:
     - _Tiling: 0.025
     - _UVSec: 0
     - _UVVDirection1UDirection0: 0
+    - _WaterAngle: 0
     - _WaterDeepTranslucencyPower: 0.1
-    - _WaterDepth: 0.143
+    - _WaterDepth: 0.084
+    - _WaterDirection: 0
     - _WaterDistort: 1
     - _WaterFalloffBorder: 8.46
     - _WaterNormalDistort: 0.03
@@ -203,6 +213,7 @@ Material:
     - _WaterShalowTranslucencyPower: 0
     - _WaterSmoothness: 0.85
     - _WaterSpecular: 0.1
+    - _WaterSpeed: 0.071
     - _WaterTessScale: 0.06
     - _WaterWaveSpeed: 0.2
     - _WaveH: 0.01
@@ -216,16 +227,23 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _Color0: {r: 0.5764706, g: 0.94509804, b: 1, a: 1}
     - _Color1: {r: 0, g: 0.1254902, b: 0.21568628, a: 0}
-    - _DeepColor: {r: 0.05882353, g: 0.09411765, b: 0.23529412, a: 0}
+    - _DeepColor: {r: 0.05882353, g: 0.09411765, b: 0.23529412, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FoamColor: {r: 20, g: 20, b: 20, a: 0}
     - _FoamSpeed: {r: -0.001, g: 0.018, b: 0, a: 0}
+    - _GAmplitude: {r: 0.3, g: 0.35, b: 0.25, a: 0.25}
+    - _GDirectionAB: {r: 0.3, g: 0.85, b: 0.85, a: 0.25}
+    - _GDirectionCD: {r: 0.1, g: 0.9, b: 0.5, a: 0.5}
+    - _GFrequency: {r: 1.3, g: 1.35, b: 1.25, a: 1.25}
+    - _GSpeed: {r: 1.2, g: 1.375, b: 1.1, a: 1.5}
+    - _GSteepness: {r: 1, g: 1, b: 1, a: 1}
     - _InvRanges: {r: 1, g: 0.17, b: 0.17, a: 0}
     - _NoiseSpeed: {r: -0.1, g: -0.3, b: 0, a: 0}
     - _ReflColor: {r: 1, g: 1, b: 1, a: 1}
     - _ReflectColor: {r: 1, g: 1, b: 1, a: 0.5}
     - _ReflectiveColor: {r: 1, g: 1, b: 1, a: 1}
     - _RefrColor: {r: 1, g: 1, b: 1, a: 1}
+    - _ShallowColor: {r: 0.52, g: 0.66, b: 0.61, a: 1}
     - _ShalowColor: {r: 0.5058824, g: 0.6627451, b: 0.6156863, a: 0}
     - _SmallCascadeColor: {r: 20, g: 20, b: 20, a: 0}
     - _SmallCascadeMainSpeed: {r: 0, g: 0.16, b: 0, a: 0}
@@ -233,6 +251,7 @@ Material:
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
     - _Specular: {r: 0.5764706, g: 0.5764706, b: 0.5764706, a: 0}
     - _WaterColor: {r: 1, g: 1, b: 1, a: 1}
+    - _WaterFlow: {r: 1, g: 0, b: 0, a: 0}
     - _WaterMainSpeed: {r: 0.01, g: 0, b: 0, a: 0}
     - _WaterMixSpeed: {r: -0.007, g: 0.05, b: 0, a: 0}
     - _WaterWaveOffset: {r: 0.1, g: 0.2, b: 0.3, a: 0.4}

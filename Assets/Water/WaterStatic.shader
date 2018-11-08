@@ -1,9 +1,13 @@
 Shader "Effect/Water/Water (Static)"
 {
 	Properties{
-		_WaterNormal("Normal Map (RGB), Foam (A)", 2D) = "white" {}
+		_WaterNormal("Water Normal Map (RGB), Foam (A)", 2D) = "white" {}
+		_WaterAngle("Water Angle",Range(0,360)) = 0
+		_WaterSpeed("Water Speed",Range(0.01,1)) = 0.1
+		_WaterDepth("Water Depth", Range(0 , 1)) = 0.17
+		_ShallowColor("Shallow Color", Color) = (0.52,0.66,0.61,1)
+		_DeepColor("Deep Color", Color) = (0.05,0.09,0.235,1)
 		_RefractDistortion("Refract Distortion", Range(0, 1000)) = 100  //控制模拟折射时图像的扭曲程度
-		_RefractRatio("Refract Ratio",Range(0.1,1)) = 0.5 //控制模拟折射率
 	}
 
 		// -----------------------------------------------------------
@@ -28,10 +32,14 @@ Shader "Effect/Water/Water (Static)"
 
 					sampler2D _WaterNormal;
 					float4 _WaterNormal_ST;
+					float _WaterAngle;
+					float _WaterSpeed;
 
+					float _WaterDepth;
+					float4 _ShallowColor;
+					float4 _DeepColor;
 					float _RefractDistortion;
-					float _RefractRatio;
-
+										
 					struct v2f {
 						float4 pos : SV_POSITION;
 						float4 scrPos : TEXCOORD0;
@@ -63,12 +71,23 @@ Shader "Effect/Water/Water (Static)"
 						return o;
 					}
 
+					float2 RotationVector(float2 vec,float angle)
+					{
+						float radZ = radians(-angle);
+						float sinZ, cosZ;
+						sincos(radZ, sinZ, cosZ);
+						return float2(vec.x * cosZ - vec.y * sinZ,
+											 vec.x * sinZ + vec.y * cosZ);
+					}
+
 					half4 frag(v2f i) : COLOR
 					{
 						float3 worldPos = float3(i.TtoW0.w, i.TtoW1.w, i.TtoW2.w);
 						fixed3 worldViewDir = normalize(UnityWorldSpaceViewDir(worldPos));
-
-						fixed3 bump = UnpackNormal(tex2D(_WaterNormal, i.uv.xy));
+												
+						//_WaterDirection
+						fixed2 offsetDirection = RotationVector(float2(0,1), _WaterAngle);
+						fixed3 bump = UnpackNormal(tex2D(_WaterNormal, i.uv.xy + offsetDirection * _Time.yy * _WaterSpeed));
 						fixed3 worldNormal = normalize(half3(dot(i.TtoW0.xyz, bump), dot(i.TtoW1.xyz, bump), dot(i.TtoW2.xyz, bump)));
 						
 						//linearEyeDepth 像素深度
@@ -76,19 +95,24 @@ Shader "Effect/Water/Water (Static)"
 						{
 							linearEyeDepth = LinearEyeDepth(tex2Dproj(_CameraDepthTexture, i.scrPos).r) - i.scrPos.z;
 						}
-						linearEyeDepth = saturate(linearEyeDepth);
 
 						//对屏幕图像的采样坐标进行偏移
 						//选择使用切线空间下的法线方向来进行偏移是因为该空间下的法线可以反映顶点局部空间下的法线方向
 						fixed2 offset = bump * _RefractDistortion * _RefractionTex_TexelSize;
+
 						//对scrPos偏移后再透视除法得到真正的屏幕坐标
-						float4 uv = i.scrPos + float4(offset,0,0) * linearEyeDepth;// / ;
+						float4 uv = i.scrPos + float4(offset,0,0) * saturate(linearEyeDepth);
+						half4 refractionColor = tex2Dproj(_RefractionTex, UNITY_PROJ_COORD(uv/ i.scrPos.w));											
 
-						half4 refraction = tex2Dproj(_RefractionTex, UNITY_PROJ_COORD(uv/ i.scrPos.w));
-
-						refraction *= linearEyeDepth;
-						refraction.a = 1;
-						return refraction;
+						//水深度颜色
+						half d = saturate(_WaterDepth * linearEyeDepth);
+						d = 1.0 - d;
+						d = lerp(d, pow(d,3), 0.5);
+						half4 waterColor = lerp(_DeepColor, _ShallowColor, d);// +_DeepColor * _WaterDepth * linearEyeDepth;						
+						
+						
+						
+						return  waterColor * refractionColor;
 					}
 					ENDCG
 			}
