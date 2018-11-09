@@ -25,10 +25,9 @@ Shader "Effect/Water/Water (Static)"
 		_TessDisplacement("Displacement", Range(0, 1.0)) = 0.3
 	}
 		SubShader{
-			LOD 200
 			Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent"}
 			Blend SrcAlpha OneMinusSrcAlpha
-			GrabPass { "_RefractionTex" }
+			GrabPass { "_GrabTex" }
 
 			CGPROGRAM
 			#include "UnityCG.cginc"
@@ -41,8 +40,8 @@ Shader "Effect/Water/Water (Static)"
 
 			sampler2D _CameraDepthTexture;
 
-			sampler2D _RefractionTex;
-			float4 _RefractionTex_TexelSize;
+			sampler2D _GrabTex;
+			float4 _GrabTex_TexelSize;
 			sampler2D _WaterNormal;
 
 			float _WaterAngle;
@@ -98,7 +97,7 @@ Shader "Effect/Water/Water (Static)"
 			void vert(inout appdata_full v)
 			{
 				float d = tex2Dlod(_TessHeightTex, float4(v.texcoord.xy, 0, 0)).r * _TessDisplacement;
-				v.vertex.xyz -= v.normal * d;
+				v.vertex.xyz += v.normal * d;
 			}
 
 			void surf(Input IN, inout SurfaceOutputStandard o) {
@@ -115,22 +114,22 @@ Shader "Effect/Water/Water (Static)"
 
 				//对屏幕图像的采样坐标进行偏移
 				//选择使用切线空间下的法线方向来进行偏移是因为该空间下的法线可以反映顶点局部空间下的法线方向
-				fixed2 offset = bump * _RefractDistortion * _RefractionTex_TexelSize;
+				fixed2 offset = bump * _RefractDistortion * _GrabTex_TexelSize;
 
 				//对scrPos偏移后再透视除法得到真正的屏幕坐标
 				float4 uv = IN.screenPos + float4(offset, 0, 0) * saturate(linearEyeDepth);
-				half4 refractionColor = tex2Dproj(_RefractionTex,UNITY_PROJ_COORD(uv / uv.w));
+				half4 refractionColor = tex2Dproj(_GrabTex,UNITY_PROJ_COORD(uv / uv.w));
 
 				//水深度颜色
 				half d = saturate(_WaterDepth * linearEyeDepth);
 				d = 1.0 - d;
 				d = lerp(d, pow(d, 3), 0.5);
 				half4 waterColor = lerp(_DeepColor, _ShallowColor, d);
-				waterColor *= refractionColor;
+				
 
 				//o.Albedo = IN.vertexColor * linearEyeDepth; Emission
-				o.Albedo = waterColor;
-				//o.Emission = waterColor;
+				//o.Albedo = waterColor;
+				o.Emission = waterColor * refractionColor * linearEyeDepth;
 				o.Alpha = 1;
 
 				//o.Normal = UnpackNormal(tex2D(_TessNormalMap, IN.uv_TessNormalMap));
