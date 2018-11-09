@@ -97,6 +97,7 @@ Shader "Effect/Water/Water (Static)"
 			void vert(inout appdata_full v)
 			{
 				float d = tex2Dlod(_TessHeightTex, float4(v.texcoord.xy, 0, 0)).r * _TessDisplacement;
+				
 				v.vertex.xyz += v.normal * d;
 			}
 
@@ -125,7 +126,7 @@ Shader "Effect/Water/Water (Static)"
 				d = lerp(d, pow(d, 3), 0.5);
 				half4 waterColor = lerp(_DeepColor, _ShallowColor, d);
 								
-				o.Albedo = waterColor * refractionColor;
+				o.Albedo = waterColor * refractionColor * saturate(linearEyeDepth);
 				//o.Emission = waterColor * refractionColor * linearEyeDepth;
 				o.Alpha = 1;
 

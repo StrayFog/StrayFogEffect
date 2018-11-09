@@ -176,7 +176,7 @@ Material:
     - _Parallax: 0.02
     - _ReflectionTint: 0.6923077
     - _RefractAmount: 1
-    - _RefractDistortion: 100
+    - _RefractDistortion: 122
     - _RefractRatio: 1
     - _ShalowDepth: 0.7
     - _ShalowFalloff: -1.2
