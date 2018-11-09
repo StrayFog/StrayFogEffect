@@ -12,12 +12,6 @@ Shader "Effect/Water/Water (Static)"
 		_RefractDistortion("Refract Distortion", Range(0, 1000)) = 100  //控制模拟折射时图像的扭曲程度
 
 		[Space(4)]
-		[Header(SurfaceOutput Settings ___________________________________________________)]
-		[Space(4)]
-		_Glossiness("Smoothness", Range(0,1)) = 0.5
-		_Metallic("Metallic", Range(0,1)) = 0.0
-
-		[Space(4)]
 		[Header(Tessellate Settings ___________________________________________________)]
 		[Space(4)]
 		_EdgeLength("Edge length", Range(2, 50)) = 25
@@ -25,18 +19,28 @@ Shader "Effect/Water/Water (Static)"
 		_TessPhongStrength("Phong Tess Strength", Range(0, 1)) = 0.5
 		_TessHeightTex("Height Map", 2D) = "gray" {}
 		_TessDisplacement("Displacement", Range(0, 1.0)) = 0.3
+
+		[Space(4)]
+		[Header(Refraction Settings ___________________________________________________)]
+		[Space(4)]
+		_RefractionTex("Refraction Tex" , 2D) = "black" {}
+
+		[Space(4)]
+		[Header(SurfaceOutput Settings ___________________________________________________)]
+		[Space(4)]
+		_Glossiness("Smoothness", Range(0,1)) = 0.5
+		_Metallic("Metallic", Range(0,1)) = 0.0
 	}
 		SubShader{
 			LOD 200
-			Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent"}			
+			Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent"}
 			Blend SrcAlpha OneMinusSrcAlpha
-			GrabPass { "_RefractionTex" }
 
 			CGPROGRAM
 			#include "UnityCG.cginc"
 			#include "Tessellation.cginc"
 			// Physically based Standard lighting model, and enable shadows on all light types
-			#pragma surface surf Standard fullforwardshadows vertex:vert alpha:fade tessellate:tessFunction tessphong:_TessPhongStrength			
+			#pragma surface surf Standard fullforwardshadows vertex:vert alpha:fade tessellate:tessFunction tessphong:_TessPhongStrength
 
 			// Use shader model 3.0 target, to get nicer looking lighting
 			#pragma target 4.6
@@ -81,7 +85,12 @@ Shader "Effect/Water/Water (Static)"
 			// #pragma instancing_options assumeuniformscaling
 			UNITY_INSTANCING_BUFFER_START(Props)
 				// put more per-instance properties here
-			UNITY_INSTANCING_BUFFER_END(Props)			
+			UNITY_INSTANCING_BUFFER_END(Props)		
+
+			float4 tessFunction(appdata_full v0, appdata_full v1, appdata_full v2)
+			{
+				return UnityEdgeLengthBasedTessCull(v0.vertex, v1.vertex, v2.vertex, _EdgeLength, _TessMaxDisp);
+			}
 
 			float2 RotationVector(float2 vec, float angle)
 			{
@@ -92,28 +101,10 @@ Shader "Effect/Water/Water (Static)"
 					vec.x * sinZ + vec.y * cosZ);
 			}
 
-			float4 tessFunction(appdata_full v0, appdata_full v1, appdata_full v2)
-			{
-				return UnityEdgeLengthBasedTessCull(v0.vertex, v1.vertex, v2.vertex, _EdgeLength, _TessMaxDisp);
-			}
-
-			inline float4 ASE_ComputeGrabScreenPos(float4 pos)
-			{
-#if UNITY_UV_STARTS_AT_TOP
-				float scale = -1.0;
-#else
-				float scale = 1.0;
-#endif
-				float4 o = pos;
-				o.y = pos.w * 0.5f;
-				o.y = (pos.y - o.y) * _ProjectionParams.x * scale + o.y;
-				return o;
-			}
-
 			void vert(inout appdata_full v)
 			{
 				float d = tex2Dlod(_TessHeightTex, float4(v.texcoord.xy, 0, 0)).r * _TessDisplacement;
-				v.vertex.xyz -= v.normal * d;
+				v.vertex.xyz += v.normal * d;
 			}
 
 			void surf(Input IN, inout SurfaceOutputStandard o) {
@@ -122,7 +113,6 @@ Shader "Effect/Water/Water (Static)"
 				{
 					linearEyeDepth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2Dproj(_CameraDepthTexture, IN.screenPos))) - IN.screenPos.w;
 				}
-				linearEyeDepth = saturate(linearEyeDepth);
 
 				//_WaterDirection
 				fixed2 offsetDirection = RotationVector(float2(0, 1), _WaterAngle);
@@ -133,8 +123,8 @@ Shader "Effect/Water/Water (Static)"
 				fixed2 offset = bump * _RefractDistortion * _RefractionTex_TexelSize;
 
 				//对scrPos偏移后再透视除法得到真正的屏幕坐标
-				float4 uv = IN.screenPos + float4(offset, 0, 0) * saturate(linearEyeDepth);				
-				half4 refractionColor = tex2Dproj(_RefractionTex,UNITY_PROJ_COORD(uv/uv.w));
+				float4 uv = IN.screenPos + float4(offset, 0, 0) * saturate(linearEyeDepth);
+				half4 refractionColor = tex2Dproj(_RefractionTex,UNITY_PROJ_COORD(uv));
 				
 				//水深度颜色
 				half d = saturate(_WaterDepth * linearEyeDepth);

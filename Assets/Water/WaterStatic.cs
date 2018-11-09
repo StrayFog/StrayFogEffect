@@ -7,27 +7,13 @@
 public class WaterStatic : MonoBehaviour
 {
     /// <summary>
-    /// 是否使用反射
+    /// 是否绘制折射
     /// </summary>
-    public bool useReflective = true;
-    /// <summary>
-    /// 是否使用折射
-    /// </summary>
-    public bool useRefractive = true;    
-    /// <summary>
-    /// 裁剪面偏移
-    /// </summary>
-    public float clipPlaneOffset = 0.07f;
-
+    public bool useRefractive;
     /// <summary>
     /// 眼睛摄像机
     /// </summary>
     public Camera eyeCamera;
-
-    /// <summary>
-    /// 反射摄像机
-    /// </summary>
-    WaterCamera mReflectiveCamera;
     /// <summary>
     /// 折射摄像机
     /// </summary>
@@ -58,65 +44,15 @@ public class WaterStatic : MonoBehaviour
         #endregion
 
         #region 固定设置
-        gameObject.layer = 4;
+        gameObject.layer = 4;        
+        eyeCamera.depthTextureMode |= DepthTextureMode.Depth;
         if (mWaterMaterial == null)
         {
             mWaterMaterial = GetComponent<Renderer>().sharedMaterial;
         }
-
-        if (useReflective && useRefractive)
-        {
-            mWaterMaterial.SetInt("_WaterDisplayMode", 0);
-        }
-        else if (useReflective)
-        {
-            mWaterMaterial.SetInt("_WaterDisplayMode", 1);
-        }
-        else if (useRefractive)
-        {
-            mWaterMaterial.SetInt("_WaterDisplayMode", 2);
-        }
-        else
-        {
-            mWaterMaterial.SetInt("_WaterDisplayMode", -1);
-        }
-
-        eyeCamera.depthTextureMode |= DepthTextureMode.Depth;
-        #endregion
-
-        #region 是否绘制反射
-        SetReflective();
-        if (useReflective)
-        {
-            if (mReflectiveCamera == null)
-            {
-                Transform rc = transform.Find("ReflectiveCamera");
-                if (rc)
-                {
-                    mReflectiveCamera = rc.GetComponent<WaterCamera>();
-                }
-                else
-                {
-                    GameObject go = new GameObject("ReflectiveCamera");
-                    go.transform.SetParent(transform, false);
-                    mReflectiveCamera = go.AddComponent<WaterCamera>();
-                }                
-            }
-            mReflectiveCamera.Render(eyeCamera, this.gameObject.layer, transform.position, transform.up, 1, clipPlaneOffset);
-            if (mReflectiveCamera.renderTexture)
-            {
-                mWaterMaterial.SetTexture("_ReflectionTex", mReflectiveCamera.renderTexture);
-            }            
-        }
-        else if(mReflectiveCamera)
-        {
-            DestroyImmediate(mReflectiveCamera.gameObject);
-            mReflectiveCamera = null;
-        }
         #endregion
 
         #region 是否绘制折射
-        SetRefractive();
         if (useRefractive)
         {
             if (mRefractiveCamera == null)
@@ -133,7 +69,7 @@ public class WaterStatic : MonoBehaviour
                     mRefractiveCamera = go.AddComponent<WaterCamera>();
                 }                
             }
-            mRefractiveCamera.Render(eyeCamera, this.gameObject.layer,transform.position, transform.up, -1, clipPlaneOffset);
+            mRefractiveCamera.RenderGrabPass(eyeCamera, gameObject.layer);
             if (mRefractiveCamera.renderTexture)
             {
                 mWaterMaterial.SetTexture("_RefractionTex", mRefractiveCamera.renderTexture);
@@ -145,40 +81,8 @@ public class WaterStatic : MonoBehaviour
             mRefractiveCamera = null;
         }
         #endregion
+
         mIsRenderWater = false;
-    }
-    #endregion
-
-    #region SetReflective 设置Reflectiv宏
-    /// <summary>
-    /// 设置Reflectiv宏
-    /// </summary>
-    void SetReflective()
-    {
-        if (useReflective)
-        {
-            mWaterMaterial.EnableKeyword("WATER_REFLECTIVE");
-        }
-        else {
-            mWaterMaterial.DisableKeyword("WATER_REFLECTIVE");
-        }
-    }
-    #endregion
-
-    #region SetRefractive 设置Refractive宏
-    /// <summary>
-    /// 设置Refractive宏
-    /// </summary>
-    void SetRefractive()
-    {
-        if (useRefractive)
-        {
-            mWaterMaterial.EnableKeyword("WATER_REFRACTIVE");
-        }
-        else
-        {
-            mWaterMaterial.DisableKeyword("WATER_REFRACTIVE");
-        }
     }
     #endregion
 }

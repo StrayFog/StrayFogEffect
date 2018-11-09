@@ -128,7 +128,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _WaterNormal:
         m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
-        m_Scale: {x: 3, y: 3}
+        m_Scale: {x: 5, y: 5}
         m_Offset: {x: 0, y: 0}
     - _WaterTesselation:
         m_Texture: {fileID: 2800000, guid: 3b6787cffd0a4434796a5ee04144e381, type: 3}
@@ -176,7 +176,7 @@ Material:
     - _Parallax: 0.02
     - _ReflectionTint: 0.6923077
     - _RefractAmount: 1
-    - _RefractDistortion: 200
+    - _RefractDistortion: 100
     - _RefractRatio: 1
     - _ShalowDepth: 0.7
     - _ShalowFalloff: -1.2
@@ -196,7 +196,7 @@ Material:
     - _TessDisplacement: 0.1
     - _TessEdgeLength: 25
     - _TessHeightDisplacement: 0.3
-    - _TessMaxDisp: 11
+    - _TessMaxDisp: 20
     - _TessNormalDisplacement: 0.3
     - _TessPhongStrength: 0.5
     - _Tiling: 0.09769231
@@ -204,7 +204,7 @@ Material:
     - _UVVDirection1UDirection0: 0
     - _WaterAngle: 0
     - _WaterDeepTranslucencyPower: 0.1
-    - _WaterDepth: 0.178
+    - _WaterDepth: 0.036
     - _WaterDirection: 0
     - _WaterDistort: 1
     - _WaterFalloffBorder: 8.46

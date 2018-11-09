@@ -115,6 +115,73 @@ public class WaterCamera : MonoBehaviour
         #endregion
     }
 
+
+    public void RenderGrabPass(Camera _eyeCamera,int _waterPlaneLayer)
+    {
+        #region 创建绘制水纹的摄像机
+        if (mCamera == null)
+        {
+            mCamera = GetComponent<Camera>();
+            if (mCamera == null)
+            {
+                mCamera = gameObject.AddComponent<Camera>();
+            }
+            mCamera.enabled = false;
+        }
+        #endregion
+
+        #region 创建绘制水纹RenderTexture
+        if (!renderTexture)
+        {
+            renderTexture = new RenderTexture(512, 512, 16);
+            renderTexture.name = "GrabPassRenderTexture";
+            renderTexture.isPowerOfTwo = true;
+            renderTexture.hideFlags = HideFlags.DontSave;
+        }
+        #endregion
+
+        #region 设置摄像机属性
+        mCamera.transform.position = _eyeCamera.transform.position;
+        mCamera.transform.rotation = _eyeCamera.transform.rotation;
+        mCamera.clearFlags = _eyeCamera.clearFlags;
+        mCamera.backgroundColor = _eyeCamera.backgroundColor;
+        if (mCamera.clearFlags == CameraClearFlags.Skybox)
+        {
+            Skybox sky = _eyeCamera.GetComponent(typeof(Skybox)) as Skybox;
+            Skybox mysky = mCamera.GetComponent(typeof(Skybox)) as Skybox;
+            if (mysky)
+            {
+                if (!sky || !sky.material)
+                {
+                    mysky.enabled = false;
+                }
+                else
+                {
+                    mysky.enabled = true;
+                    mysky.material = sky.material;
+                }
+            }
+        }
+        mCamera.farClipPlane = _eyeCamera.farClipPlane;
+        mCamera.nearClipPlane = _eyeCamera.nearClipPlane;
+        mCamera.orthographic = _eyeCamera.orthographic;
+        mCamera.fieldOfView = _eyeCamera.fieldOfView;
+        mCamera.aspect = _eyeCamera.aspect;
+        mCamera.orthographicSize = _eyeCamera.orthographicSize;
+        mCamera.worldToCameraMatrix = _eyeCamera.worldToCameraMatrix;
+        mCamera.cullingMask = ~(1 << _waterPlaneLayer); // never render water layer        
+        mCamera.targetTexture = renderTexture;
+        mCamera.depthTextureMode = DepthTextureMode.None;
+        mCamera.renderingPath = RenderingPath.Forward;
+        mCamera.worldToCameraMatrix = _eyeCamera.worldToCameraMatrix;
+        mCamera.projectionMatrix = _eyeCamera.projectionMatrix;
+        #endregion
+
+        #region 绘图
+        mCamera.Render();
+        #endregion
+    }
+
     #region 视图矩阵
     // Extended sign: returns -1, 0 or 1 based on sign of a
     private static float sgn(float a)
