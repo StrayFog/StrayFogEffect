@@ -704,87 +704,6 @@ Mesh:
   m_MeshMetrics[0]: 100.000015
   m_MeshMetrics[1]: 1
   m_MeshOptimized: 0
---- !u!1 &1316184018
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1316184019}
-  - component: {fileID: 1316184021}
-  - component: {fileID: 1316184020}
-  m_Layer: 0
-  m_Name: RefractiveCamera
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1316184019
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1316184018}
-  m_LocalRotation: {x: 0.18566363, y: -0.040940844, z: 0.0077440217, w: 0.98172957}
-  m_LocalPosition: {x: -0.44516635, y: 0.31640226, z: -1.7799928}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1910853873}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!20 &1316184020
-Camera:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1316184018}
-  m_Enabled: 0
-  serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.278431, g: 0.278431, b: 0.278431, a: 0}
-  m_projectionMatrixMode: 1
-  m_SensorSize: {x: 36, y: 24}
-  m_LensShift: {x: 0, y: 0}
-  m_FocalLength: 50
-  m_NormalizedViewPortRect:
-    serializedVersion: 2
-    x: 0
-    y: 0
-    width: 1
-    height: 1
-  near clip plane: 0.678505
-  far clip plane: 135701
-  field of view: 53.239407
-  orthographic: 0
-  orthographic size: 5
-  m_Depth: 0
-  m_CullingMask:
-    serializedVersion: 2
-    m_Bits: 4294967279
-  m_RenderingPath: -1
-  m_TargetTexture: {fileID: 0}
-  m_TargetDisplay: 0
-  m_TargetEye: 3
-  m_HDR: 0
-  m_AllowMSAA: 1
-  m_AllowDynamicResolution: 0
-  m_ForceIntoRT: 0
-  m_OcclusionCulling: 1
-  m_StereoConvergence: 10
-  m_StereoSeparation: 0.022
---- !u!114 &1316184021
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1316184018}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 593308f0eeba01f4faa079238f6f263f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1696680342
 GameObject:
   m_ObjectHideFlags: 0
@@ -912,7 +831,6 @@ GameObject:
   - component: {fileID: 1910853873}
   - component: {fileID: 1910853876}
   - component: {fileID: 1910853875}
-  - component: {fileID: 1910853877}
   m_Layer: 4
   m_Name: Water
   m_TagString: Untagged
@@ -927,10 +845,9 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1910853872}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 131.3, y: 7, z: 127.5}
+  m_LocalPosition: {x: 131.3, y: 5.25, z: 127.5}
   m_LocalScale: {x: 26, y: 26, z: 26}
-  m_Children:
-  - {fileID: 1316184019}
+  m_Children: []
   m_Father: {fileID: 780018062}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -976,19 +893,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1910853872}
   m_Mesh: {fileID: 1273689275}
---- !u!114 &1910853877
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1910853872}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e535646eb10e6044cab8738dd38e0c1d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  useRefractive: 1
-  eyeCamera: {fileID: 0}
 --- !u!1 &1958013662
 GameObject:
   m_ObjectHideFlags: 0
