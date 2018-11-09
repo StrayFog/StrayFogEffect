@@ -106,12 +106,11 @@ Shader "Effect/Water/Water (Static)"
 				{
 					linearEyeDepth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2Dproj(_CameraDepthTexture, IN.screenPos))) - IN.screenPos.w;
 				}
-				linearEyeDepth = saturate(linearEyeDepth);
 
 				//_WaterDirection
 				fixed2 offsetDirection = RotationVector(float2(0, 1), _WaterAngle);
 				fixed3 bump = UnpackNormal(tex2D(_WaterNormal, IN.uv_WaterNormal + offsetDirection * _Time.yy * _WaterSpeed));
-
+				
 				//对屏幕图像的采样坐标进行偏移
 				//选择使用切线空间下的法线方向来进行偏移是因为该空间下的法线可以反映顶点局部空间下的法线方向
 				fixed2 offset = bump * _RefractDistortion * _GrabTex_TexelSize;
@@ -125,11 +124,9 @@ Shader "Effect/Water/Water (Static)"
 				d = 1.0 - d;
 				d = lerp(d, pow(d, 3), 0.5);
 				half4 waterColor = lerp(_DeepColor, _ShallowColor, d);
-				
-
-				//o.Albedo = IN.vertexColor * linearEyeDepth; Emission
-				//o.Albedo = waterColor;
-				o.Emission = waterColor * refractionColor * linearEyeDepth;
+								
+				o.Albedo = waterColor * refractionColor;
+				//o.Emission = waterColor * refractionColor * linearEyeDepth;
 				o.Alpha = 1;
 
 				//o.Normal = UnpackNormal(tex2D(_TessNormalMap, IN.uv_TessNormalMap));
