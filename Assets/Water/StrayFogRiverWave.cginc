@@ -21,6 +21,8 @@ float _WaterNormalScale;
 float _WaterAngle;
 float _WaterSpeed;
 
+sampler2D _WaterFoam;
+
 float _WaterDepth;
 float4 _ShallowColor;
 float4 _DeepColor;
@@ -28,6 +30,7 @@ float _RefractDistortion;
 
 struct Input {
 	half2 uv_WaterNormal;
+	half2 uv_WaterFoam;
 	float3 worldNormal;
 	float3 worldPos;
 	float3 viewDir;
@@ -101,12 +104,29 @@ float3 Tonemap(float3 x)
 	return (x * (a * x + b)) / (x * (c * x + d) + e);
 }
 
-float2 SmoothWave()
+float4 WaveOffset(float2 uv)
 {
-	float2 dir = RotationVector(float2(0, 1), _WaterAngle);
-	return dir * _Time.y * 0.1;
+	float4 result = float4(uv,0,0);
+	result.xy += RotationVector(float2(0, 1) * _Time.y * _WaterSpeed, _WaterAngle);
+	return result;
 }
 
+float3 SmoothWave(float3 _wave)
+{
+	float3 vResult = float3(0, 0, 0);
+	float fTot = 0.0;
+	float2 fragCoord = _wave.xy;
+	for (int i = 0; i < 10; i++)
+	{
+		float3 vRandom = float3(SmoothNoise(fragCoord.xy + fTot),
+			SmoothNoise(fragCoord.yx + fTot + 42.0),
+			SmoothNoise(fragCoord.xx + fragCoord.yy + fTot + 42.0)) * 2.0 - 1.0;
+		vResult += normalize(vRandom);
+		fTot += 1.0;
+	}
+	vResult /= fTot;
+	return vResult;
+}
 
 //tessellate计算
 float4 tessFunction(appdata_full v0, appdata_full v1, appdata_full v2)
@@ -116,8 +136,8 @@ float4 tessFunction(appdata_full v0, appdata_full v1, appdata_full v2)
 
 void tessVert(inout appdata_full v)
 {
-	float3 d = tex2Dlod(_WaterTesselation, float4(v.texcoord.xy + SmoothWave(), 0, 0)).rbg * _TessDisplacement;
-	v.vertex.xyz += v.normal * d;
+	float3 wave = tex2Dlod(_WaterTesselation, float4(WaveOffset(v.texcoord.xy).xy, 0, 0)).rbg * _TessDisplacement;
+	v.vertex.xyz += v.normal * SmoothWave(wave);
 }
 
 void surf(Input IN, inout SurfaceOutputStandard o) {
@@ -129,7 +149,8 @@ void surf(Input IN, inout SurfaceOutputStandard o) {
 
 	//计算法线，光反射强度
 	float3 eyeVec = normalize(IN.worldPos.xyz - _WorldSpaceCameraPos);
-	float3 normal = UnpackScaleNormal(tex2D(_WaterNormal, IN.uv_WaterNormal + SmoothWave()), _WaterNormalScale);
+	float3 normal = UnpackScaleNormal(tex2D(_WaterNormal, WaveOffset(IN.uv_WaterNormal)), _WaterNormalScale);		
+
 	float3 worldNormal = WorldNormalVector(IN, normal);
 	float3 lightDir = UnityWorldSpaceLightDir(IN.worldPos);
 	
@@ -138,50 +159,26 @@ void surf(Input IN, inout SurfaceOutputStandard o) {
 
 	//水底纹理
 	float4 grabUV = IN.screenPos;
-	grabUV.xy += normal.xy;
+	grabUV.xy += normal.xy * _RefractDistortion * _GrabTex_TexelSize;
 	float4 grabColor = tex2Dproj(_GrabTex, grabUV);
+
+	float4 foamColor = tex2D(_WaterFoam, IN.uv_WaterFoam);
+
+	//水深
+	half depth = saturate(_WaterDepth * linearEyeDepth);
+	depth = 1.0 - depth;
+	depth = lerp(depth, pow(depth, 3), 0.5);
+
+	float4 resultColor = lerp(_DeepColor, _ShallowColor, depth);
+	
+	resultColor *= grabColor;
 
 	//设置输出
 	o.Normal = normal;
-	o.Emission = grabColor.rgb * _ShallowColor.rgb;
-	o.Albedo = NdotV;
+	o.Emission = resultColor.rgb;
+	o.Albedo = resultColor.rgb * NdotV;
 	o.Alpha = 1;
-	//float linearEyeDepth = 1;
-	////linearEyeDepth 像素深度
-	//{
-	//	linearEyeDepth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2Dproj(_CameraDepthTexture, IN.screenPos))) - IN.screenPos.w;
-	//}
-	//linearEyeDepth = saturate(linearEyeDepth);
 
-	////_WaterDirection
-	//fixed2 offsetDirection = RotationVector(float2(0, 1), _WaterAngle);
-	//float2 uv_WaterNormal = IN.uv_texcoord.xy * _WaterNormal_ST.xy + _WaterNormal_ST.zw;
-
-	//fixed3 bump = UnpackNormal(tex2D(_WaterNormal, uv_WaterNormal + offsetDirection * _Time.yy * _WaterSpeed));
-
-	////对屏幕图像的采样坐标进行偏移
-	////选择使用切线空间下的法线方向来进行偏移是因为该空间下的法线可以反映顶点局部空间下的法线方向
-	//fixed2 offset = bump * _RefractDistortion * _GrabTex_TexelSize;
-
-	////对scrPos偏移后再透视除法得到真正的屏幕坐标
-	//float4 uv = IN.screenPos + float4(offset, 0, 0) * saturate(linearEyeDepth);
-	//half4 refractionColor = tex2Dproj(_GrabTex,UNITY_PROJ_COORD(uv / uv.w));
-
-	////水深度颜色
-	//half d = saturate(_WaterDepth * linearEyeDepth);
-	//d = 1.0 - d;
-	//d = lerp(d, pow(d, 3), 0.5);
-	//half4 waterColor = lerp(_DeepColor, _ShallowColor, d);
-
-
-	////o.Albedo = IN.vertexColor * linearEyeDepth; Emission
-	////o.Albedo = waterColor;
-	//o.Emission = waterColor * refractionColor * linearEyeDepth;
-	//o.Alpha = linearEyeDepth;
-
-
-	//o.Normal = UnpackNormal(tex2D(_TessNormalMap, IN.uv_TessNormalMap));
-	// Metallic and smoothness come from slider variables
 	o.Metallic = _Metallic;
 	o.Smoothness = _Glossiness;
 }
