@@ -10,6 +10,42 @@ sampler2D _WaterTesselation;
 float4 _WaterTesselation_ST;
 float _TessDisplacement;
 
+#pragma target 4.6
+
+sampler2D _CameraDepthTexture;
+
+sampler2D _GrabTex;
+float4 _GrabTex_TexelSize;
+sampler2D _WaterNormal;
+float _WaterNormalScale;
+float _WaterAngle;
+float _WaterSpeed;
+
+float _WaterDepth;
+float4 _ShallowColor;
+float4 _DeepColor;
+float _RefractDistortion;
+
+struct Input {
+	half2 uv_WaterNormal;
+	float3 worldNormal;
+	float3 worldPos;
+	float3 viewDir;
+	INTERNAL_DATA
+		float4 vertexColor : COLOR0;
+	float4 screenPos;
+};
+
+half _Glossiness;
+half _Metallic;
+
+// Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
+		// See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
+		// #pragma instancing_options assumeuniformscaling
+UNITY_INSTANCING_BUFFER_START(Props)
+// put more per-instance properties here
+UNITY_INSTANCING_BUFFER_END(Props)
+
 float2 RotationVector(float2 vec, float angle)
 {
 	float radZ = radians(-angle);
@@ -64,56 +100,13 @@ float3 Tonemap(float3 x)
 
 	return (x * (a * x + b)) / (x * (c * x + d) + e);
 }
-half3 Lux_UnpackScaleNormal(half2 packednormal, half bumpScale)
+
+float2 SmoothWave()
 {
-
-	half3 normal;
-	normal.xy = (packednormal.xy * 2 - 1);
-#if (SHADER_TARGET >= 30)
-	// SM2.0: instruction count limitation
-	// SM2.0: normal scaler is not supported
-	normal.xy *= bumpScale;
-#endif
-	normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy)));
-	return normal;
-
+	float2 dir = RotationVector(float2(0, 1), _WaterAngle);
+	return dir * _Time.y * 0.1;
 }
 
-#pragma target 4.6
-
-sampler2D _CameraDepthTexture;
-
-sampler2D _GrabTex;
-float4 _GrabTex_TexelSize;
-sampler2D _WaterNormal;
-float _WaterNormalScale;
-float _WaterAngle;
-float _WaterSpeed;
-
-float _WaterDepth;
-float4 _ShallowColor;
-float4 _DeepColor;
-float _RefractDistortion;
-
-struct Input {
-	half2 uv_WaterNormal;
-	float3 worldNormal;
-	float3 worldPos;
-	float3 viewDir;
-	INTERNAL_DATA
-	float4 vertexColor : COLOR0;
-	float4 screenPos;
-};
-
-half _Glossiness;
-half _Metallic;
-
-// Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
-		// See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
-		// #pragma instancing_options assumeuniformscaling
-UNITY_INSTANCING_BUFFER_START(Props)
-// put more per-instance properties here
-UNITY_INSTANCING_BUFFER_END(Props)
 
 //tessellate计算
 float4 tessFunction(appdata_full v0, appdata_full v1, appdata_full v2)
@@ -123,28 +116,35 @@ float4 tessFunction(appdata_full v0, appdata_full v1, appdata_full v2)
 
 void tessVert(inout appdata_full v)
 {
-	float d = tex2Dlod(_WaterTesselation, float4(v.texcoord.xy, 0, 0)).r * _TessDisplacement;
+	float3 d = tex2Dlod(_WaterTesselation, float4(v.texcoord.xy + SmoothWave(), 0, 0)).rbg * _TessDisplacement;
 	v.vertex.xyz += v.normal * d;
 }
 
 void surf(Input IN, inout SurfaceOutputStandard o) {
+	float linearEyeDepth = 1;
+	//linearEyeDepth 像素深度
+	{
+		linearEyeDepth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2Dproj(_CameraDepthTexture, IN.screenPos))) - IN.screenPos.w;
+	}
 
+	//计算法线，光反射强度
 	float3 eyeVec = normalize(IN.worldPos.xyz - _WorldSpaceCameraPos);
-	float3 normal = UnpackScaleNormal(tex2D(_WaterNormal, IN.uv_WaterNormal), _WaterNormalScale);
+	float3 normal = UnpackScaleNormal(tex2D(_WaterNormal, IN.uv_WaterNormal + SmoothWave()), _WaterNormalScale);
 	float3 worldNormal = WorldNormalVector(IN, normal);
 	float3 lightDir = UnityWorldSpaceLightDir(IN.worldPos);
 	
 	float NdotV = max(0, dot(worldNormal, eyeVec));// 漫反射强度
+	NdotV *= dot(reflect(lightDir, worldNormal), eyeVec);//光反射强度
 
-	NdotV *= dot(reflect(lightDir, worldNormal), eyeVec);
-
+	//水底纹理
 	float4 grabUV = IN.screenPos;
 	grabUV.xy += normal.xy;
 	float4 grabColor = tex2Dproj(_GrabTex, grabUV);
 
+	//设置输出
 	o.Normal = normal;
 	o.Emission = grabColor.rgb * _ShallowColor.rgb;
-	//o.Albedo = NdotV;
+	o.Albedo = NdotV;
 	o.Alpha = 1;
 	//float linearEyeDepth = 1;
 	////linearEyeDepth 像素深度
