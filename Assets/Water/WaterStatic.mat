@@ -217,6 +217,7 @@ Material:
     - _WaterDistort: 1
     - _WaterFalloffBorder: 8.46
     - _WaterNormalDistort: 0.03
+    - _WaterNormalScale: 1
     - _WaterNormalSmooth: 1
     - _WaterRefractDistortion: 100
     - _WaterShalowTranslucencyPower: 0
