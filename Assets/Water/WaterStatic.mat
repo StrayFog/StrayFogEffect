@@ -23,11 +23,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BigCascadeNormal:
-        m_Texture: {fileID: 2800000, guid: 7f0ed8cd4d33aec44b083d6648fa95b6, type: 3}
+        m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BigCascadeWaterTess:
-        m_Texture: {fileID: 2800000, guid: 26157d54f8f92c84ea23df9810dce2fa, type: 3}
+        m_Texture: {fileID: 2800000, guid: 3b6787cffd0a4434796a5ee04144e381, type: 3}
         m_Scale: {x: 1, y: 3}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -67,7 +67,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Foam:
-        m_Texture: {fileID: 2800000, guid: 608471d86f0b50643b1f5810281d86af, type: 3}
+        m_Texture: {fileID: 2800000, guid: 6a660a7056facc941bce6ec6752b2f73, type: 3}
         m_Scale: {x: 3, y: 3}
         m_Offset: {x: 0, y: 0}
     - _GTex:
@@ -83,7 +83,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Noise:
-        m_Texture: {fileID: 2800000, guid: cb8a31e22f3929c4390f49a01f3fca0f, type: 3}
+        m_Texture: {fileID: 2800000, guid: 3b6787cffd0a4434796a5ee04144e381, type: 3}
         m_Scale: {x: 2, y: 2}
         m_Offset: {x: 0, y: 0}
     - _NoiseTex:
@@ -111,7 +111,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SmallCascade:
-        m_Texture: {fileID: 2800000, guid: cc42ffce0746a8e498ffbc9e74b296bc, type: 3}
+        m_Texture: {fileID: 2800000, guid: 3b6787cffd0a4434796a5ee04144e381, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SmallCascadeNormal:
@@ -143,7 +143,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _TesselationTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 3b6787cffd0a4434796a5ee04144e381, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _WaterFoam:
@@ -152,7 +152,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _WaterNormal:
         m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
-        m_Scale: {x: 3, y: 3}
+        m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _WaterTesselation:
         m_Texture: {fileID: 2800000, guid: 3b6787cffd0a4434796a5ee04144e381, type: 3}
@@ -186,7 +186,7 @@ Material:
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _Displacement: 0.3
-    - _Distortion: 1000
+    - _Distortion: 0.03
     - _DstBlend: 0
     - _EdgeLength: 25
     - _FlowSpeed: 0.3
@@ -201,7 +201,7 @@ Material:
     - _Metallic: 1
     - _Mode: 0
     - _NoiseRange: 6.43
-    - _NormalScale: 0
+    - _NormalScale: 0.5
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _ReflectionTint: 0.6923077
@@ -219,7 +219,7 @@ Material:
     - _SmallCascadeNormalScale: 0
     - _SmallCascadeSmoothness: 0
     - _SmallCascadeSpecular: 0.8
-    - _SmallCascadeWaterTessScale: 0
+    - _SmallCascadeWaterTessScale: 0.07
     - _SmoothnessTextureChannel: 0
     - _Specular: 1.86
     - _SpecularHighlights: 1
@@ -236,19 +236,19 @@ Material:
     - _UVVDirection1UDirection0: 1
     - _WaterAngle: 0
     - _WaterDeepTranslucencyPower: 0.1
-    - _WaterDepth: 0.019
+    - _WaterDepth: 0.2
     - _WaterDirection: 0
     - _WaterDistort: 1
     - _WaterFalloffBorder: 8.46
     - _WaterNormalDistort: 0.03
     - _WaterNormalScale: 1
     - _WaterNormalSmooth: 1
-    - _WaterRefract: 100
+    - _WaterRefract: 200
     - _WaterRefractDistortion: 100
     - _WaterShalowTranslucencyPower: 0
     - _WaterSmoothness: 0.85
     - _WaterSpecular: 0.1
-    - _WaterSpeed: 0.84
+    - _WaterSpeed: 0.4
     - _WaterTessScale: 0.02
     - _WaterWaveSpeed: 0.2
     - _WaveDelta: 2.43
@@ -265,7 +265,7 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _Color0: {r: 0.5764706, g: 0.94509804, b: 1, a: 1}
     - _Color1: {r: 0, g: 0.1254902, b: 0.21568628, a: 0}
-    - _DeepColor: {r: 0.21137416, g: 0.24209079, b: 0.3584906, a: 1}
+    - _DeepColor: {r: 0.2047437, g: 0.29573032, b: 0.4056604, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FoamColor: {r: 20, g: 20, b: 20, a: 0}
     - _FoamSpeed: {r: -0.001, g: 0.018, b: 0, a: 0}
@@ -282,7 +282,7 @@ Material:
     - _ReflectColor: {r: 1, g: 1, b: 1, a: 0.5}
     - _ReflectiveColor: {r: 1, g: 1, b: 1, a: 1}
     - _RefrColor: {r: 1, g: 1, b: 1, a: 1}
-    - _ShallowColor: {r: 0.3762905, g: 0.5283019, b: 0.4791217, a: 1}
+    - _ShallowColor: {r: 0.38349944, g: 0.5849056, b: 0.52082187, a: 1}
     - _ShalowColor: {r: 0.5058824, g: 0.6627451, b: 0.6156863, a: 0}
     - _SmallCascadeColor: {r: 20, g: 20, b: 20, a: 0}
     - _SmallCascadeMainSpeed: {r: 0, g: 0.16, b: 0, a: 0}

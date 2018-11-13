@@ -1,16 +1,15 @@
 Shader "Effect/Water/Water (Static)"
 {
 	Properties{
-		_WaterNormal("Water Normal Map", 2D) = "bump" {}
-		_WaterNormalScale("Water Normal Scale", Range(0,1)) = 0.6
-		_WaterAngle("Water Angle",Range(0,360)) = 0
-		_WaterSpeed("Water Speed",Range(0.01,5)) = 0.03
-		_WaterDepth("Water Depth", Range(0 , 1)) = 0.01
-		_ShallowColor("Shallow Color", Color) = (0.52,0.66,0.61,1)
-		_DeepColor("Deep Color", Color) = (0.05,0.09,0.235,1)
-		_WaterRefract("Water Refract", Range(0, 1000)) = 100  //控制模拟折射时图像的扭曲程度
-		_WaterFoam("Water Foam Map", 2D) = "black" {}
-		_Range("Range", vector) = (0.13, 1.53, 0.37, 0.78)
+		_WaterNormal("Water Normal", 2D) = "bump" {}
+
+		[Space(4)]
+		[Header(Tessellate Wave ___________________________________________________)]
+		[Space(4)]
+		_UVVDirection1UDirection0("UV - V Direction (1) U Direction (0)", Int) = 0
+		_WaterMixSpeed("Water Mix Speed", Vector) = (0.01,0.05,0,0)
+		_WaterMainSpeed("Water Main Speed", Vector) = (1,1,0,0)
+		_WaterTessScale("Water Tess Scale", Float) = 0.06
 
 		[Space(4)]
 		[Header(SurfaceOutput Settings ___________________________________________________)]
@@ -20,13 +19,12 @@ Shader "Effect/Water/Water (Static)"
 		_Gloss("Gloss", float) = 0.71
 
 		[Space(4)]
-		[Header(Tessellate Settings ___________________________________________________)]
+		[Header(Tessellate Mesh ___________________________________________________)]
 		[Space(4)]
-		_EdgeLength("Edge length", Range(2, 50)) = 25
+		_TessEdgeLength("Edge length", Range(2, 50)) = 25
 		_TessMaxDisp("Max Displacement", Float) = 20
 		_TessPhongStrength("Phong Tess Strength", Range(0, 1)) = 0.5
-		_WaterTesselation("Water Tesselation", 2D) = "black" {}
-		_TessDisplacement("Displacement", Range(0, 1.0)) = 0.1			
+		_TesselationTex("Tesselation", 2D) = "black" {}	
 	}
 	SubShader{
 		Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent"}
