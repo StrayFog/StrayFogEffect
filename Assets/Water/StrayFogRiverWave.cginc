@@ -6,10 +6,9 @@ sampler2D _WaterNormal;
 float4 _WaterNormal_ST;
 
 //Tessellate Wave 
-uniform int _UVVDirection1UDirection0;
-uniform half2 _WaterMixSpeed;
-uniform half2 _WaterMainSpeed;
-uniform half _WaterTessScale;
+half _WaterSpeed;
+half _WaterAngle;
+half _WaterTessScale;
 
 //Tessellate Mesh
 float _TessEdgeLength;
@@ -54,15 +53,18 @@ float4 tessFunction(appdata_full v0, appdata_full v1, appdata_full v2)
 
 void tessVert(inout appdata_full v)
 {
+	int _UVVDirection1UDirection0 = 0;
+	float4 _WaterMixSpeed = float4 (0.01, 0.05, 0, 0);
+	float4 _WaterMainSpeed = float4(1, 1, 0, 0);
+
 	float mulTime445 = _Time.y * 1;
-	int Direction723 = _UVVDirection1UDirection0;
-	float2 appendResult706 = (half2(_WaterMixSpeed.y, _WaterMixSpeed.x));
+	float2 Direction723 = RotationVector(float2(0,1),_WaterAngle).xy * _WaterSpeed;
+
 	float2 uv_WaterNormal = v.texcoord.xy * _WaterNormal_ST.xy + _WaterNormal_ST.zw;
-	float2 panner612 = (uv_WaterNormal + mulTime445 * (((float)Direction723 == 1) ? _WaterMixSpeed : appendResult706));
+	float2 panner612 = (uv_WaterNormal + mulTime445 * Direction723);
 	float2 WaterSpeedValueMix516 = panner612;
-	float2 appendResult705 = (half2(_WaterMainSpeed.y, _WaterMainSpeed.x));
 	float2 uv4_TexCoord829 = v.texcoord3.xy * float2(1, 1) + float2(0, 0);
-	float2 appendResult823 = (half2(((((float)Direction723 == 1) ? _WaterMainSpeed : appendResult705).x * uv4_TexCoord829.x), ((((float)Direction723 == 1) ? _WaterMainSpeed : appendResult705).y * uv4_TexCoord829.y)));
+	float2 appendResult823 = half2(Direction723.x * uv4_TexCoord829.x, Direction723.y * uv4_TexCoord829.y);
 	float mulTime815 = _Time.y * 0.3;
 	float temp_output_816_0 = (mulTime815 * 0.15);
 	float temp_output_818_0 = frac((temp_output_816_0 + 1));

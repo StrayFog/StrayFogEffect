@@ -240,6 +240,8 @@ Material:
     - _WaterDirection: 0
     - _WaterDistort: 1
     - _WaterFalloffBorder: 8.46
+    - _WaterMainSpeed: 1
+    - _WaterMixSpeed: 0.01
     - _WaterNormalDistort: 0.03
     - _WaterNormalScale: 1
     - _WaterNormalSmooth: 1
@@ -248,7 +250,7 @@ Material:
     - _WaterShalowTranslucencyPower: 0
     - _WaterSmoothness: 0.85
     - _WaterSpecular: 0.1
-    - _WaterSpeed: 0.4
+    - _WaterSpeed: 0.05
     - _WaterTessScale: 0.02
     - _WaterWaveSpeed: 0.2
     - _WaveDelta: 2.43

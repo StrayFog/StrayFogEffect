@@ -6,10 +6,9 @@ Shader "Effect/Water/Water (Static)"
 		[Space(4)]
 		[Header(Tessellate Wave ___________________________________________________)]
 		[Space(4)]
-		_UVVDirection1UDirection0("UV - V Direction (1) U Direction (0)", Int) = 0
-		_WaterMixSpeed("Water Mix Speed", Vector) = (0.01,0.05,0,0)
-		_WaterMainSpeed("Water Main Speed", Vector) = (1,1,0,0)
-		_WaterTessScale("Water Tess Scale", Float) = 0.06
+		_WaterAngle("Water Angle", Range(0,360)) = 0
+		_WaterSpeed("Water Speed", Range(0,1)) = 0.05
+		_WaterTessScale("Water Tess Scale", Range(0,0.2)) = 0.02
 
 		[Space(4)]
 		[Header(SurfaceOutput Settings ___________________________________________________)]
