@@ -163,7 +163,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _WaveTex:
-        m_Texture: {fileID: 2800000, guid: 6a660a7056facc941bce6ec6752b2f73, type: 3}
+        m_Texture: {fileID: 2800000, guid: a79255898dd8f0948a9d31c6e3c78026, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _texcoord:
@@ -225,7 +225,7 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _Tess: 4
-    - _TessDisplacement: 0.15
+    - _TessDisplacement: 0.3
     - _TessEdgeLength: 25
     - _TessHeightDisplacement: 0.3
     - _TessMaxDisp: 11
@@ -236,7 +236,7 @@ Material:
     - _UVVDirection1UDirection0: 1
     - _WaterAngle: 0
     - _WaterDeepTranslucencyPower: 0.1
-    - _WaterDepth: 0.051
+    - _WaterDepth: 0.019
     - _WaterDirection: 0
     - _WaterDistort: 1
     - _WaterFalloffBorder: 8.46
@@ -248,7 +248,7 @@ Material:
     - _WaterShalowTranslucencyPower: 0
     - _WaterSmoothness: 0.85
     - _WaterSpecular: 0.1
-    - _WaterSpeed: 1
+    - _WaterSpeed: 0.84
     - _WaterTessScale: 0.02
     - _WaterWaveSpeed: 0.2
     - _WaveDelta: 2.43
@@ -265,7 +265,7 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _Color0: {r: 0.5764706, g: 0.94509804, b: 1, a: 1}
     - _Color1: {r: 0, g: 0.1254902, b: 0.21568628, a: 0}
-    - _DeepColor: {r: 0.05882353, g: 0.09411765, b: 0.23529412, a: 1}
+    - _DeepColor: {r: 0.21137416, g: 0.24209079, b: 0.3584906, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FoamColor: {r: 20, g: 20, b: 20, a: 0}
     - _FoamSpeed: {r: -0.001, g: 0.018, b: 0, a: 0}
@@ -277,12 +277,12 @@ Material:
     - _GSteepness: {r: 1, g: 1, b: 1, a: 1}
     - _InvRanges: {r: 0.53, g: 0.16, b: 0.47, a: 0}
     - _NoiseSpeed: {r: -0.1, g: -0.3, b: 0, a: 0}
-    - _Range: {r: 0.13, g: 0, b: 0.37, a: 0.78}
+    - _Range: {r: -6.83, g: 0, b: 0.37, a: -4.01}
     - _ReflColor: {r: 1, g: 1, b: 1, a: 1}
     - _ReflectColor: {r: 1, g: 1, b: 1, a: 0.5}
     - _ReflectiveColor: {r: 1, g: 1, b: 1, a: 1}
     - _RefrColor: {r: 1, g: 1, b: 1, a: 1}
-    - _ShallowColor: {r: 0.5058824, g: 0.6627451, b: 0.6156863, a: 1}
+    - _ShallowColor: {r: 0.3762905, g: 0.5283019, b: 0.4791217, a: 1}
     - _ShalowColor: {r: 0.5058824, g: 0.6627451, b: 0.6156863, a: 0}
     - _SmallCascadeColor: {r: 20, g: 20, b: 20, a: 0}
     - _SmallCascadeMainSpeed: {r: 0, g: 0.16, b: 0, a: 0}

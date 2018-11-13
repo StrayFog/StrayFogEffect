@@ -4,12 +4,13 @@ Shader "Effect/Water/Water (Static)"
 		_WaterNormal("Water Normal Map", 2D) = "bump" {}
 		_WaterNormalScale("Water Normal Scale", Range(0,1)) = 0.6
 		_WaterAngle("Water Angle",Range(0,360)) = 0
-		_WaterSpeed("Water Speed",Range(0.01,1)) = 0.03
+		_WaterSpeed("Water Speed",Range(0.01,5)) = 0.03
 		_WaterDepth("Water Depth", Range(0 , 1)) = 0.01
 		_ShallowColor("Shallow Color", Color) = (0.52,0.66,0.61,1)
 		_DeepColor("Deep Color", Color) = (0.05,0.09,0.235,1)
 		_WaterRefract("Water Refract", Range(0, 1000)) = 100  //控制模拟折射时图像的扭曲程度
 		_WaterFoam("Water Foam Map", 2D) = "black" {}
+		_Range("Range", vector) = (0.13, 1.53, 0.37, 0.78)
 
 		[Space(4)]
 		[Header(SurfaceOutput Settings ___________________________________________________)]
@@ -37,7 +38,7 @@ Shader "Effect/Water/Water (Static)"
 		#include "Tessellation.cginc"
 		#include "StrayFogRiverWave.cginc"
 		// Physically based Standard lighting model, and enable shadows on all light types
-		#pragma surface surf WaterLight fullforwardshadows vertex:tessVert alpha:fade tessellate:tessFunction tessphong:_TessPhongStrength		
+		#pragma surface surf StandardSpecular fullforwardshadows vertex:tessVert alpha:fade tessellate:tessFunction tessphong:_TessPhongStrength		
 		ENDCG
 	}
 	FallBack "Diffuse"
