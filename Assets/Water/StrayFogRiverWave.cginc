@@ -1,8 +1,5 @@
 ﻿#ifndef STRAYFOGRIVERWAVE_CG_INCLUDED
 #define STRAYFOGRIVERWAVE_CG_INCLUDED
-
-#define MOD2 float2(4.438975,3.972973);
-
 float _EdgeLength;
 float _TessMaxDisp;
 float _TessPhongStrength;
@@ -26,7 +23,10 @@ sampler2D _WaterFoam;
 float _WaterDepth;
 float4 _ShallowColor;
 float4 _DeepColor;
-float _RefractDistortion;
+float _WaterRefract;
+
+half _Specular;
+fixed _Gloss;
 
 struct Input {
 	half2 uv_WaterNormal;
@@ -38,16 +38,23 @@ struct Input {
 		float4 vertexColor : COLOR0;
 	float4 screenPos;
 };
-
-half _Glossiness;
-half _Metallic;
-
 // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
 		// See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
 		// #pragma instancing_options assumeuniformscaling
 UNITY_INSTANCING_BUFFER_START(Props)
 // put more per-instance properties here
 UNITY_INSTANCING_BUFFER_END(Props)
+
+fixed4 LightingWaterLight(SurfaceOutput s, fixed3 lightDir, half3 viewDir, fixed atten) {
+	half3 halfVector = normalize(lightDir + viewDir);
+	float diffFactor = max(0, dot(lightDir, s.Normal)) * 0.8 + 0.2;
+	float nh = max(0, dot(halfVector, s.Normal));
+	float spec = pow(nh, s.Specular * 128.0) * s.Gloss;
+	fixed4 c;
+	c.rgb = (s.Albedo * _LightColor0.rgb * diffFactor + _SpecColor.rgb * spec * _LightColor0.rgb) * (atten);
+	c.a = s.Alpha + spec * _SpecColor.a;
+	return c;
+}
 
 float2 RotationVector(float2 vec, float angle)
 {
@@ -58,6 +65,7 @@ float2 RotationVector(float2 vec, float angle)
 		vec.x * sinZ + vec.y * cosZ);
 }
 
+#define MOD2 float2(4.438975,3.972973);
 float Hash(float p)
 {
 	// https://www.shadertoy.com/view/4djSRW - Dave Hoskins
@@ -93,21 +101,10 @@ float SmoothNoise(in float2 o)
 	return res;
 }
 
-float3 Tonemap(float3 x)
-{
-	float a = 0.010;
-	float b = 0.132;
-	float c = 0.010;
-	float d = 0.163;
-	float e = 0.101;
-
-	return (x * (a * x + b)) / (x * (c * x + d) + e);
-}
-
 float4 WaveOffset(float2 uv)
 {
 	float4 result = float4(uv,0,0);
-	result.xy += RotationVector(float2(0, 1) * _Time.y * _WaterSpeed, _WaterAngle);
+	result.xy += RotationVector(float2(0, 1) * _Time.x * _WaterSpeed, _WaterAngle);
 	return result;
 }
 
@@ -136,50 +133,53 @@ float4 tessFunction(appdata_full v0, appdata_full v1, appdata_full v2)
 
 void tessVert(inout appdata_full v)
 {
-	float3 wave = tex2Dlod(_WaterTesselation, float4(WaveOffset(v.texcoord.xy).xy, 0, 0)).rbg * _TessDisplacement;
-	v.vertex.xyz += v.normal * SmoothWave(wave);
+	float4 uv1 = WaveOffset(v.texcoord.xy);
+	float4 uv2 = WaveOffset(float2(1 - v.texcoord.y, v.texcoord.x));
+	float3 wave = ((tex2Dlod(_WaterTesselation, uv1) + tex2Dlod(_WaterTesselation, uv2)) * 0.5).rbg;
+	v.vertex.xyz += v.normal * SmoothWave(wave) * _TessDisplacement;
 }
 
-void surf(Input IN, inout SurfaceOutputStandard o) {
+void surf(Input IN, inout SurfaceOutput o) {
 	float linearEyeDepth = 1;
 	//linearEyeDepth 像素深度
 	{
 		linearEyeDepth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2Dproj(_CameraDepthTexture, IN.screenPos))) - IN.screenPos.w;
 	}
 
-	//计算法线，光反射强度
-	float3 eyeVec = normalize(IN.worldPos.xyz - _WorldSpaceCameraPos);
-	float3 normal = UnpackScaleNormal(tex2D(_WaterNormal, WaveOffset(IN.uv_WaterNormal)), _WaterNormalScale);		
+	////计算法线，光反射强度
+	//float3 eyeVec = normalize(IN.worldPos.xyz - _WorldSpaceCameraPos);	
+	//float3 worldNormal = WorldNormalVector(IN, normal);
+	//float3 lightDir = UnityWorldSpaceLightDir(IN.worldPos);
+	//
+	//float NdotV = dot(reflect(lightDir, worldNormal), eyeVec);//光反射强度
+	//float NdotV = max(0, dot(worldNormal, eyeVec));// 漫反射强度
+	//NdotV *= dot(reflect(lightDir, worldNormal), eyeVec);//光反射强度
 
-	float3 worldNormal = WorldNormalVector(IN, normal);
-	float3 lightDir = UnityWorldSpaceLightDir(IN.worldPos);
-	
-	float NdotV = max(0, dot(worldNormal, eyeVec));// 漫反射强度
-	NdotV *= dot(reflect(lightDir, worldNormal), eyeVec);//光反射强度
+	float4 waterNormal = (tex2D(_WaterNormal, WaveOffset(IN.uv_WaterNormal)) + tex2D(_WaterNormal, WaveOffset(float2(1 - IN.uv_WaterNormal.y, IN.uv_WaterNormal.x)))) / 2;
+	half2 offset = UnpackScaleNormal(waterNormal,_WaterNormalScale).xy * _WaterRefract;
 
 	//水底纹理
 	float4 grabUV = IN.screenPos;
-	grabUV.xy += normal.xy * _RefractDistortion * _GrabTex_TexelSize;
+	grabUV.xy += offset * _GrabTex_TexelSize;
 	float4 grabColor = tex2Dproj(_GrabTex, grabUV);
 
-	float4 foamColor = tex2D(_WaterFoam, IN.uv_WaterFoam);
+	/*float2 foamUV = IN.uv_WaterFoam;
+	foamUV.xy += normal.xy * _WaterRefract * _GrabTex_TexelSize;
+	float4 foamColor = tex2D(_WaterFoam, foamUV);*/
 
 	//水深
 	half depth = saturate(_WaterDepth * linearEyeDepth);
 	depth = 1.0 - depth;
 	depth = lerp(depth, pow(depth, 3), 0.5);
 
-	float4 resultColor = lerp(_DeepColor, _ShallowColor, depth);
+	float4 depthColor = lerp(_DeepColor, _ShallowColor, depth);
 	
-	resultColor *= grabColor;
-
 	//设置输出
-	o.Normal = normal;
-	o.Emission = resultColor.rgb;
-	o.Albedo = resultColor.rgb * NdotV;
+	o.Normal = UnpackScaleNormal(waterNormal, _WaterNormalScale).xyz;
+	o.Albedo = grabColor * depthColor;
 	o.Alpha = 1;
 
-	o.Metallic = _Metallic;
-	o.Smoothness = _Glossiness;
+	o.Specular = _Specular;
+	o.Gloss = _Gloss;	
 }
 #endif
