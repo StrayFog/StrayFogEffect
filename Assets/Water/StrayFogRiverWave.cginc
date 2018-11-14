@@ -100,9 +100,13 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 		(_WaterNormalScale * 1.2)), UnpackScaleNormal(tex2D(_WaterNormal, uv_WaterNormal.yx), _WaterNormalScale));
 	float3 lerp_WaterNormal = lerp(temp_WaterNormal_0, temp_WaterNormal_1, uv_WaterNormal.x);
 
+	float4 grabUV = IN.screenPos;
+	grabUV.xy += lerp_WaterNormal.xy;
+	float4 waterGrabColor = tex2Dproj(_GrabTex, grabUV);
 
 	o.Normal = lerp_WaterNormal;
-	//o.Emission = UnpackNormal(waterNormal).rgb;
+	o.Emission = waterGrabColor.rgb;
+	o.Albedo = waterGrabColor.rgb;
 	o.Specular = _Specular;
 	o.Smoothness = _Smoothness;
 	o.Occlusion = 1;
