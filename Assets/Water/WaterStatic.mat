@@ -152,7 +152,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _WaterNormal:
         m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
-        m_Scale: {x: 1, y: 1}
+        m_Scale: {x: 3, y: 3}
         m_Offset: {x: 0, y: 0}
     - _WaterTesselation:
         m_Texture: {fileID: 2800000, guid: 3b6787cffd0a4434796a5ee04144e381, type: 3}
@@ -202,6 +202,7 @@ Material:
     - _Mode: 0
     - _NoiseRange: 6.43
     - _NormalScale: 0.5
+    - _Occlusion: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _ReflectionTint: 0.6923077
@@ -244,14 +245,15 @@ Material:
     - _WaterMainSpeed: 1
     - _WaterMixSpeed: 0.01
     - _WaterNormalDistort: 0.03
-    - _WaterNormalScale: 0.328
+    - _WaterNormalScale: 0.2
     - _WaterNormalSmooth: 1
     - _WaterRefract: 200
     - _WaterRefractDistortion: 100
+    - _WaterRefraction: 0.41
     - _WaterShalowTranslucencyPower: 0
     - _WaterSmoothness: 0.85
     - _WaterSpecular: 0.1
-    - _WaterSpeed: 0.05
+    - _WaterSpeed: 0.1
     - _WaterTessScale: 0.02
     - _WaterWaveSpeed: 0.2
     - _WaveDelta: 2.43

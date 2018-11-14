@@ -9,6 +9,7 @@ half _WaterSpeed;
 half _WaterAngle;
 half _WaterTessScale;
 half _WaterNormalScale;
+half _WaterRefraction;
 
 //Tessellate Mesh
 float _TessEdgeLength;
@@ -29,7 +30,7 @@ struct Input {
 	half2 uv_WaterNormal;
 	float3 worldNormal;
 	INTERNAL_DATA
-	float4 vertexColor : COLOR;
+		float4 vertexColor : COLOR;
 	float4 screenPos;
 };
 // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
@@ -56,12 +57,8 @@ float4 tessFunction(appdata_full v0, appdata_full v1, appdata_full v2)
 
 void tessVert(inout appdata_full v)
 {
-	int _UVVDirection1UDirection0 = 0;
-	float4 _WaterMixSpeed = float4 (0.01, 0.05, 0, 0);
-	float4 _WaterMainSpeed = float4(1, 1, 0, 0);
-
 	float mulTime445 = _Time.y * 1;
-	float2 Direction723 = RotationVector(float2(0,1),_WaterAngle).xy * _WaterSpeed;
+	float2 Direction723 = RotationVector(float2(0, 1), _WaterAngle).xy * _WaterSpeed;
 
 	float2 uv_WaterNormal = v.texcoord.xy * _TesselationTex_ST.xy + _TesselationTex_ST.zw;
 	float2 panner612 = (uv_WaterNormal + mulTime445 * Direction723);
@@ -90,18 +87,16 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	}
 
 	float iTime = _Time.y;
-	float2 Direction723 = RotationVector(float2(0, 1), _WaterAngle).xy * _WaterSpeed;	
+	float2 Direction723 = RotationVector(float2(0, 1), _WaterAngle).xy * _WaterSpeed;
 	float2 uv_WaterNormal = IN.uv_WaterNormal;
 
 	uv_WaterNormal = uv_WaterNormal + iTime * Direction723;
-	float3 temp_WaterNormal_0 = BlendNormals(UnpackScaleNormal(tex2D(_WaterNormal, uv_WaterNormal),
-		(_WaterNormalScale * 1.2)), UnpackScaleNormal(tex2D(_WaterNormal, uv_WaterNormal), _WaterNormalScale));
-	float3 temp_WaterNormal_1 = BlendNormals(UnpackScaleNormal(tex2D(_WaterNormal, uv_WaterNormal.yx),
-		(_WaterNormalScale * 1.2)), UnpackScaleNormal(tex2D(_WaterNormal, uv_WaterNormal.yx), _WaterNormalScale));
-	float3 lerp_WaterNormal = lerp(temp_WaterNormal_0, temp_WaterNormal_1, uv_WaterNormal.x);
+
+	float3 lerp_WaterNormal = UnpackScaleNormal(tex2D(_WaterNormal, uv_WaterNormal), _WaterNormalScale) +
+		UnpackScaleNormal(tex2D(_WaterNormal, float2(1 - uv_WaterNormal.y, uv_WaterNormal.x)), _WaterNormalScale);
 
 	float4 grabUV = IN.screenPos;
-	grabUV.xy += lerp_WaterNormal.xy;
+	grabUV.xy += lerp_WaterNormal.xy * _WaterRefraction;
 	float4 waterGrabColor = tex2Dproj(_GrabTex, grabUV);
 
 	o.Normal = lerp_WaterNormal;
