@@ -3,19 +3,19 @@
 #pragma target 4.6
 
 sampler2D _WaterNormal;
-float4 _WaterNormal_ST;
 
 //Tessellate Wave 
 half _WaterSpeed;
 half _WaterAngle;
 half _WaterTessScale;
+half _WaterNormalScale;
 
 //Tessellate Mesh
 float _TessEdgeLength;
 float _TessMaxDisp;
 float _TessPhongStrength;
 sampler2D _TesselationTex;
-
+float4 _TesselationTex_ST;
 
 sampler2D _CameraDepthTexture;
 
@@ -23,10 +23,13 @@ sampler2D _GrabTex;
 float4 _GrabTex_TexelSize;
 
 half _Specular;
-fixed _Gloss;
+fixed _Smoothness;
 
 struct Input {
+	half2 uv_WaterNormal;
+	float3 worldNormal;
 	INTERNAL_DATA
+	float4 vertexColor : COLOR;
 	float4 screenPos;
 };
 // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
@@ -60,7 +63,7 @@ void tessVert(inout appdata_full v)
 	float mulTime445 = _Time.y * 1;
 	float2 Direction723 = RotationVector(float2(0,1),_WaterAngle).xy * _WaterSpeed;
 
-	float2 uv_WaterNormal = v.texcoord.xy * _WaterNormal_ST.xy + _WaterNormal_ST.zw;
+	float2 uv_WaterNormal = v.texcoord.xy * _TesselationTex_ST.xy + _TesselationTex_ST.zw;
 	float2 panner612 = (uv_WaterNormal + mulTime445 * Direction723);
 	float2 WaterSpeedValueMix516 = panner612;
 	float2 uv4_TexCoord829 = v.texcoord3.xy * float2(1, 1) + float2(0, 0);
@@ -76,16 +79,33 @@ void tessVert(inout appdata_full v)
 	float SlowFlowHeightBase835 = clampResult845;
 	float lerpResult840 = lerp(tex2Dlod(_TesselationTex, half4(WaterSpeedValueMainFlowUV1830, 0, 1)).g, tex2Dlod(_TesselationTex, half4(WaterSpeedValueMainFlowUV2831, 0, 1)).r, SlowFlowHeightBase835);
 	float3 ase_vertexNormal = v.normal.xyz;
-	v.vertex.xyz += (((_WaterTessScale * tex2Dlod(_TesselationTex, half4(WaterSpeedValueMix516, 0, 1)).r) + (_WaterTessScale * lerpResult840)) * ase_vertexNormal);	
+	v.vertex.xyz += (((_WaterTessScale * tex2Dlod(_TesselationTex, half4(WaterSpeedValueMix516, 0, 1)).r) + (_WaterTessScale * lerpResult840)) * ase_vertexNormal);
 }
 
-void surf(Input IN, inout SurfaceOutputStandardSpecular o) {
+void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	float linearEyeDepth = 1;
 	//linearEyeDepth 像素深度
 	{
 		linearEyeDepth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2Dproj(_CameraDepthTexture, IN.screenPos))) - IN.screenPos.w;
-	}	
-	o.Albedo = 0;
-	o.Alpha = linearEyeDepth;
+	}
+
+	float iTime = _Time.y;
+	float2 Direction723 = RotationVector(float2(0, 1), _WaterAngle).xy * _WaterSpeed;	
+	float2 uv_WaterNormal = IN.uv_WaterNormal;
+
+	uv_WaterNormal = uv_WaterNormal + iTime * Direction723;
+	float3 temp_WaterNormal_0 = BlendNormals(UnpackScaleNormal(tex2D(_WaterNormal, uv_WaterNormal),
+		(_WaterNormalScale * 1.2)), UnpackScaleNormal(tex2D(_WaterNormal, uv_WaterNormal), _WaterNormalScale));
+	float3 temp_WaterNormal_1 = BlendNormals(UnpackScaleNormal(tex2D(_WaterNormal, uv_WaterNormal.yx),
+		(_WaterNormalScale * 1.2)), UnpackScaleNormal(tex2D(_WaterNormal, uv_WaterNormal.yx), _WaterNormalScale));
+	float3 lerp_WaterNormal = lerp(temp_WaterNormal_0, temp_WaterNormal_1, uv_WaterNormal.x);
+
+
+	o.Normal = lerp_WaterNormal;
+	//o.Emission = UnpackNormal(waterNormal).rgb;
+	o.Specular = _Specular;
+	o.Smoothness = _Smoothness;
+	o.Occlusion = 1;
+	o.Alpha = 1;
 }
 #endif

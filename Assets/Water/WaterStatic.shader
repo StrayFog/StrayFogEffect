@@ -2,6 +2,7 @@ Shader "Effect/Water/Water (Static)"
 {
 	Properties{
 		_WaterNormal("Water Normal", 2D) = "bump" {}
+		_WaterNormalScale("Water Scale", Range(0,1)) = 0.5
 
 		[Space(4)]
 		[Header(Tessellate Wave ___________________________________________________)]
@@ -12,10 +13,9 @@ Shader "Effect/Water/Water (Static)"
 
 		[Space(4)]
 		[Header(SurfaceOutput Settings ___________________________________________________)]
-		[Space(4)]		
-		_SpecColor("SpecColor", color) = (1, 1, 1, 1)
-		_Specular("Specular", float) = 1.86
-		_Gloss("Gloss", float) = 0.71
+		[Space(4)]
+		_Specular("Specular", Range(0,1)) = 1
+		_Smoothness("Smoothness", Range(0,1)) = 1
 
 		[Space(4)]
 		[Header(Tessellate Mesh ___________________________________________________)]
@@ -35,7 +35,7 @@ Shader "Effect/Water/Water (Static)"
 		#include "Tessellation.cginc"
 		#include "StrayFogRiverWave.cginc"
 		// Physically based Standard lighting model, and enable shadows on all light types
-		#pragma surface surf StandardSpecular fullforwardshadows vertex:tessVert alpha:fade tessellate:tessFunction tessphong:_TessPhongStrength		
+		#pragma surface tessSurf StandardSpecular fullforwardshadows vertex:tessVert alpha:fade tessellate:tessFunction tessphong:_TessPhongStrength		
 		ENDCG
 	}
 	FallBack "Diffuse"

@@ -220,8 +220,9 @@ Material:
     - _SmallCascadeSmoothness: 0
     - _SmallCascadeSpecular: 0.8
     - _SmallCascadeWaterTessScale: 0.07
+    - _Smoothness: 1
     - _SmoothnessTextureChannel: 0
-    - _Specular: 1.86
+    - _Specular: 1
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _Tess: 4
@@ -243,7 +244,7 @@ Material:
     - _WaterMainSpeed: 1
     - _WaterMixSpeed: 0.01
     - _WaterNormalDistort: 0.03
-    - _WaterNormalScale: 1
+    - _WaterNormalScale: 0.328
     - _WaterNormalSmooth: 1
     - _WaterRefract: 200
     - _WaterRefractDistortion: 100
