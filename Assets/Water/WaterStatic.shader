@@ -4,19 +4,24 @@ Shader "Effect/Water/Water (Static)"
 		_WaterNormal("Water Normal", 2D) = "bump" {}
 		_WaterNormalScale("Water Scale", Range(0,1)) = 0.5
 		_WaterRefraction("Water Refraction", Range(0,2)) = 1.33
+		_WaterFoam("Water Foam", 2D) = "grap" {}
+		_WaterShallowColor("Shallow Color", Color) = (1,1,1,1)
+		_WaterDeepColor("Deep Color", Color) = (0,0,0,0)
+		_WaterDepth("Water Depth", Range(0,1)) = 0.05
 
 		[Space(4)]
 		[Header(Tessellate Wave ___________________________________________________)]
 		[Space(4)]
 		_WaterAngle("Water Angle", Range(0,360)) = 0
+		_WaterWaveOverlay("Water Overlay", Range(0,90)) = 10
 		_WaterSpeed("Water Speed", Range(0,1)) = 0.05
 		_WaterTessScale("Water Tess Scale", Range(0,0.2)) = 0.02
 
 		[Space(4)]
 		[Header(SurfaceOutput Settings ___________________________________________________)]
 		[Space(4)]
-		_Specular("Specular", Range(0,1)) = 1
-		_Smoothness("Smoothness", Range(0,1)) = 1
+		_Specular("Specular",Color) = (1,1,1,1)
+		_Smoothness("Smoothness", Range(0,1)) = 0.5
 		_Occlusion("Occlusion", Range(0,1)) = 1
 		
 		[Space(4)]
@@ -32,10 +37,6 @@ Shader "Effect/Water/Water (Static)"
 	}
 	SubShader{
 		Tags{ "RenderType" = "Transparent"  "Queue" = "Geometry+999" "IgnoreProjector" = "True" "IsEmissive" = "true"  }
-		Cull Off
-		ZTest LEqual
-		Blend SrcAlpha OneMinusSrcAlpha , SrcAlpha OneMinusSrcAlpha
-		BlendOp Add , Add
 		GrabPass { "_GrabTex" }
 
 		CGPROGRAM

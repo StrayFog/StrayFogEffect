@@ -148,7 +148,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _WaterFoam:
         m_Texture: {fileID: 2800000, guid: 6a660a7056facc941bce6ec6752b2f73, type: 3}
-        m_Scale: {x: 1, y: 1}
+        m_Scale: {x: 3, y: 3}
         m_Offset: {x: 0, y: 0}
     - _WaterNormal:
         m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
@@ -159,7 +159,7 @@ Material:
         m_Scale: {x: 3, y: 3}
         m_Offset: {x: 0, y: 0}
     - _WaterTex:
-        m_Texture: {fileID: 2800000, guid: af0c6fccd44d29744a38944833e85bee, type: 3}
+        m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _WaveTex:
@@ -196,13 +196,13 @@ Material:
     - _FoamSpecular: 0
     - _Gloss: 0.71
     - _GlossMapScale: 1
-    - _Glossiness: 0
+    - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _Metallic: 1
+    - _Metallic: 0
     - _Mode: 0
     - _NoiseRange: 6.43
     - _NormalScale: 0.5
-    - _Occlusion: 1
+    - _Occlusion: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _ReflectionTint: 0.6923077
@@ -242,19 +242,23 @@ Material:
     - _WaterDirection: 0
     - _WaterDistort: 1
     - _WaterFalloffBorder: 8.46
+    - _WaterFresnelBias: 1
+    - _WaterFresnelPower: 5
+    - _WaterFresnelScale: 1
     - _WaterMainSpeed: 1
     - _WaterMixSpeed: 0.01
     - _WaterNormalDistort: 0.03
-    - _WaterNormalScale: 0.2
+    - _WaterNormalScale: 1
     - _WaterNormalSmooth: 1
     - _WaterRefract: 200
     - _WaterRefractDistortion: 100
-    - _WaterRefraction: 0.41
+    - _WaterRefraction: 1.3
     - _WaterShalowTranslucencyPower: 0
     - _WaterSmoothness: 0.85
     - _WaterSpecular: 0.1
-    - _WaterSpeed: 0.1
+    - _WaterSpeed: 0.02
     - _WaterTessScale: 0.02
+    - _WaterWaveOverlay: 20
     - _WaterWaveSpeed: 0.2
     - _WaveDelta: 2.43
     - _WaveH: 0.01
@@ -293,12 +297,13 @@ Material:
     - _SmallCascadeMainSpeed: {r: 0, g: 0.16, b: 0, a: 0}
     - _SmallCascadeMixSpeed: {r: 0.02, g: 0.07, b: 0, a: 0}
     - _SpecColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Specular: {r: 0.5764706, g: 0.5764706, b: 0.5764706, a: 0}
+    - _Specular: {r: 1, g: 1, b: 1, a: 0}
     - _WaterColor: {r: 1, g: 1, b: 1, a: 1}
-    - _WaterDeepColor: {r: 0.05, g: 0.09, b: 0.235, a: 1}
+    - _WaterDeepColor: {r: 0, g: 0.1254902, b: 0.21568628, a: 1}
     - _WaterFlow: {r: 1, g: 0, b: 0, a: 0}
     - _WaterMainSpeed: {r: 0.01, g: 0, b: 0, a: 0}
     - _WaterMixSpeed: {r: -0.007, g: 0.05, b: 0, a: 0}
-    - _WaterShallowColor: {r: 0.52, g: 0.66, b: 0.61, a: 1}
+    - _WaterRanges: {r: 1, g: 0.17, b: 0.17, a: 0}
+    - _WaterShallowColor: {r: 0.5764706, g: 0.94509804, b: 1, a: 1}
     - _WaterWaveOffset: {r: 0.1, g: 0.2, b: 0.3, a: 0.4}
     - _WaterWaveScale: {r: 1, g: 1, b: 1, a: 1}
