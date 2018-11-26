@@ -18,6 +18,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _Albedo:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BigCascade:
         m_Texture: {fileID: 2800000, guid: dc6ba2ab2b030ee41ba201d4220ac382, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -62,6 +66,10 @@ Material:
         m_Texture: {fileID: 2800000, guid: 3b6787cffd0a4434796a5ee04144e381, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _DummyTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _EmissionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -72,6 +80,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _GTex:
         m_Texture: {fileID: 2800000, guid: aefb6a11625dee140a703394ecaa38ba, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _GlossMap:
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
@@ -122,6 +134,10 @@ Material:
         m_Texture: {fileID: 2800000, guid: 3b6787cffd0a4434796a5ee04144e381, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _SpecMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _TessDispTex:
         m_Texture: {fileID: 2800000, guid: 3b6787cffd0a4434796a5ee04144e381, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -146,19 +162,31 @@ Material:
         m_Texture: {fileID: 2800000, guid: 3b6787cffd0a4434796a5ee04144e381, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _TextureSample2:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _WaterFoam:
         m_Texture: {fileID: 2800000, guid: 6a660a7056facc941bce6ec6752b2f73, type: 3}
         m_Scale: {x: 3, y: 3}
         m_Offset: {x: 0, y: 0}
     - _WaterNormal:
         m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
-        m_Scale: {x: 3, y: 3}
+        m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _WaterTesselation:
         m_Texture: {fileID: 2800000, guid: 3b6787cffd0a4434796a5ee04144e381, type: 3}
         m_Scale: {x: 3, y: 3}
         m_Offset: {x: 0, y: 0}
     - _WaterTex:
+        m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WaveHeight:
+        m_Texture: {fileID: 2800000, guid: 3b6787cffd0a4434796a5ee04144e381, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WaveNormals:
         m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -172,6 +200,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _AOPower: 1
+    - _Amplitude: 11
     - _BigCascadeAngle: 7
     - _BigCascadeAngleFalloff: 2.3
     - _BigCascadeFoamFalloff: 1.88
@@ -194,14 +223,20 @@ Material:
     - _FoamFalloff: -10.9
     - _FoamSmoothness: 0
     - _FoamSpecular: 0
+    - _ForcedSpecFresnel: 6
+    - _ForcedSpecGlossiness: 3
+    - _ForcedSpecIntensity: 12
     - _Gloss: 0.71
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
+    - _HeightCoeff: 1
     - _Metallic: 0
     - _Mode: 0
     - _NoiseRange: 6.43
+    - _NormalMapScale: 1
     - _NormalScale: 0.5
+    - _NumberOfWaves: 1
     - _Occlusion: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
@@ -225,12 +260,19 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _Specular: 1
     - _SpecularHighlights: 1
+    - _Speed: 1
     - _SrcBlend: 1
+    - _Steepness: 1
+    - _SteepnessCoeff: 3
+    - _SteepnessFalloff: 0.3684832
+    - _SteepnessRange: 59.59169
     - _Tess: 4
+    - _TessAmount: 50
     - _TessDisplacement: 0.3
     - _TessEdgeLength: 25
     - _TessHeightDisplacement: 0.3
     - _TessMaxDisp: 11
+    - _TessMaxDistance: 300
     - _TessNormalDisplacement: 0.3
     - _TessPhongStrength: 0.5
     - _Tiling: 0.09769231
@@ -248,7 +290,7 @@ Material:
     - _WaterMainSpeed: 1
     - _WaterMixSpeed: 0.01
     - _WaterNormalDistort: 0.03
-    - _WaterNormalScale: 1
+    - _WaterNormalScale: 0.5
     - _WaterNormalSmooth: 1
     - _WaterRefract: 200
     - _WaterRefractDistortion: 100
@@ -265,6 +307,7 @@ Material:
     - _WaveHeight: 0.03
     - _WaveRange: 0.3
     - _WaveSpeed: -12.64
+    - _Wavelength: 1
     - _ZWrite: 1
     - __dirty: 1
     m_Colors:
@@ -278,6 +321,7 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FoamColor: {r: 20, g: 20, b: 20, a: 0}
     - _FoamSpeed: {r: -0.001, g: 0.018, b: 0, a: 0}
+    - _ForcedSpecColor: {r: 0.05147058, g: 0.450507, b: 1, a: 1}
     - _GAmplitude: {r: 0.3, g: 0.35, b: 0.25, a: 0.25}
     - _GDirectionAB: {r: 0.3, g: 0.85, b: 0.85, a: 0.25}
     - _GDirectionCD: {r: 0.1, g: 0.9, b: 0.5, a: 0.5}
@@ -297,6 +341,7 @@ Material:
     - _SmallCascadeMainSpeed: {r: 0, g: 0.16, b: 0, a: 0}
     - _SmallCascadeMixSpeed: {r: 0.02, g: 0.07, b: 0, a: 0}
     - _SpecColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SpecColorNorm: {r: 1, g: 1, b: 1, a: 1}
     - _Specular: {r: 1, g: 1, b: 1, a: 0}
     - _WaterColor: {r: 1, g: 1, b: 1, a: 1}
     - _WaterDeepColor: {r: 0, g: 0.1254902, b: 0.21568628, a: 1}

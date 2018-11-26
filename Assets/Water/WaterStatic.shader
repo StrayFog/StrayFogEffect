@@ -1,21 +1,12 @@
 Shader "Effect/Water/Water (Static)"
 {
 	Properties{
-		_WaterNormal("Water Normal", 2D) = "bump" {}
-		_WaterNormalScale("Water Scale", Range(0,1)) = 0.5
-		_WaterRefraction("Water Refraction", Range(0,2)) = 1.33
-		_WaterFoam("Water Foam", 2D) = "grap" {}
-		_WaterShallowColor("Shallow Color", Color) = (1,1,1,1)
-		_WaterDeepColor("Deep Color", Color) = (0,0,0,0)
-		_WaterDepth("Water Depth", Range(0,1)) = 0.05
-
-		[Space(4)]
-		[Header(Tessellate Wave ___________________________________________________)]
-		[Space(4)]
-		_WaterAngle("Water Angle", Range(0,360)) = 0
-		_WaterWaveOverlay("Water Overlay", Range(0,90)) = 10
-		_WaterSpeed("Water Speed", Range(0,1)) = 0.05
-		_WaterTessScale("Water Tess Scale", Range(0,0.2)) = 0.02
+		_GAmplitude("Wave Amplitude", Vector) = (0.3 ,0.35, 0.25, 0.25)
+		_GFrequency("Wave Frequency", Vector) = (1.3, 1.35, 1.25, 1.25)
+		_GSteepness("Wave Steepness", Vector) = (1.0, 1.0, 1.0, 1.0)
+		_GSpeed("Wave Speed", Vector) = (1.2, 1.375, 1.1, 1.5)
+		_GDirectionAB("Wave Direction", Vector) = (0.3 ,0.85, 0.85, 0.25)
+		_GDirectionCD("Wave Direction", Vector) = (0.1 ,0.9, 0.5, 0.5)
 
 		[Space(4)]
 		[Header(SurfaceOutput Settings ___________________________________________________)]
@@ -42,7 +33,7 @@ Shader "Effect/Water/Water (Static)"
 		CGPROGRAM
 		#include "UnityCG.cginc"
 		#include "Tessellation.cginc"
-		#include "StrayFogRiverWave.cginc"
+		#include "StrayFogWaterSurf.cginc"
 		// Physically based Standard lighting model, and enable shadows on all light types
 		#pragma surface tessSurf StandardSpecular keepalpha vertex:tessVert tessellate:tessFunction tessphong:_TessPhongStrength		
 		ENDCG
