@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 /// <summary>
-/// 折射效果
+/// 基础水
 /// </summary>
-[AddComponentMenu("Effect/Water/WaterStatic")]
+[AddComponentMenu("Effect/Water/WaterBase")]
 [ExecuteInEditMode]// Make water live-update even when not in play mode
-public class WaterStatic : MonoBehaviour
+public class WaterBase : MonoBehaviour
 {
     /// <summary>
     /// 眼睛摄像机
@@ -27,14 +27,13 @@ public class WaterStatic : MonoBehaviour
             return;
         if (mIsRenderWater)
             return;
-        mIsRenderWater = true;
         #endregion
 
+        mIsRenderWater = true;
         #region 固定设置
         gameObject.layer = 4;
         eyeCamera.depthTextureMode |= DepthTextureMode.Depth;
         #endregion
-
         mIsRenderWater = false;
     }
 }

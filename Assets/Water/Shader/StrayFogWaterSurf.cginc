@@ -1,6 +1,12 @@
 ﻿#pragma target 4.6
 #include "StrayFogCameraDepthTexture.cginc"
 #include "StrayFogRiver.cginc"
+//Water
+sampler2D _WaterNormal;
+float _WaterNormalScale;
+float _WaterAngle;
+float _WaterSpeed;
+float _WaterRefraction;
 
 //Tessellate Mesh
 float _TessEdgeLength;
@@ -49,17 +55,10 @@ float4 tessFunction(appdata_full v0, appdata_full v1, appdata_full v2)
 	return UnityEdgeLengthBasedTessCull(v0.vertex, v1.vertex, v2.vertex, _TessEdgeLength, _TessMaxDisp);
 }
 
-float4 _GAmplitude;
-float4 _GFrequency;
-float4 _GSteepness;
-float4 _GSpeed;
-float4 _GDirectionAB;
-float4 _GDirectionCD;
-
 void tessVert(inout appdata_full v)
 {	
-	v.vertex.xyz += GerstnerWave(v.vertex,half3(1,1,1),
-		_GSteepness, _GAmplitude, _GFrequency, _GSpeed, _GDirectionAB, _GDirectionCD);
+	/*v.vertex.xyz += GerstnerWave(v.vertex,half3(1,1,1),
+		_GSteepness, _GAmplitude, _GFrequency, _GSpeed, _GDirectionAB, _GDirectionCD);*/
 }
 
 void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
@@ -68,23 +67,53 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 
 	float iTime = _Time.y;
 
-	//float4 _FarBumpSampleParams = float4(0.25, 0.01, 0, 0);
-	//float2 _FinalBumpSpeed01 = RotationVector(float2(0, 1), _WaterAngle + 10).xy * _WaterSpeed;
-	//half2 uv_WaterNormal = IN.uv_WaterNormal;
+	float t = _Time.x / 4;
+	float2 uv_WaterNormal = IN.uv_WaterNormal;
+	uv_WaterNormal += t * 0.2;
+	float4 c1 = tex2D(_WaterNormal, uv_WaterNormal);
+	uv_WaterNormal += t * 0.3;
+	float4 c2 = tex2D(_WaterNormal, uv_WaterNormal);
+	uv_WaterNormal += t * 0.4;
+	float4 c3 = tex2D(_WaterNormal, uv_WaterNormal);
+	c1 += c2 - c3;
+	float4 normal = (c1.x + c1.y + c1.z) / 3;
 
-	//uv_WaterNormal = StrayFogSampleNormal(_WaterNormal, uv_WaterNormal, _WaterNormalScale);
+	o.Normal = UnpackNormal(normal).xyz;
 
-	//fixed4 farSample = tex2D(_WaterNormal, 
-	//	uv_WaterNormal * _FarBumpSampleParams.x +
-	//	_Time.x * _FinalBumpSpeed01 * _FarBumpSampleParams.x);
-	//
-	//fixed4 normalSample = tex2D(_WaterNormal, uv_WaterNormal + farSample.rg * 0.05);
-	//normalSample = lerp(normalSample, farSample,saturate(linearEyeDepth * _FarBumpSampleParams.y));
-	//
-	//fixed3 lerp_WaterNormal = UnpackScaleNormal(normalSample,_WaterNormalScale);
-	//float4 grabUV = IN.screenPos;
-	////grabUV.xy += lerp_WaterNormal.xy * _WaterRefraction;
-	//float4 waterGrabColor = tex2Dproj(_GrabTex, grabUV);
+	half fresnelFac = saturate(dot(IN.viewDir, o.Normal));
+
+	float4 grabUV = IN.screenPos;	
+	grabUV.xy += o.Normal.xz * _GrabTex_TexelSize.xy * _WaterRefraction;
+	grabUV.xy /= grabUV.w;
+	float4 waterGrabColor = tex2Dproj(_GrabTex, grabUV);
+
+	o.Emission = lerp(waterGrabColor *0.5,waterGrabColor, fresnelFac);
+
+	
+	
+
+	//half fresnel = sqrt(1.0 - dot(-normalize(IN.viewDir), o.Normal));
+
+
+	/*float4 _FarBumpSampleParams = float4(0.25, 0.01, 0, 0);
+	float2 _FinalBumpSpeed01 = RotationVector(float2(0, 1), _WaterAngle + 10).xy * _WaterSpeed;
+	half2 uv_WaterNormal = IN.uv_WaterNormal;
+
+	fixed4 farSample = tex2D(_WaterNormal, 
+		uv_WaterNormal +
+		_Time.x * _FinalBumpSpeed01 * _FarBumpSampleParams.x);
+	
+	fixed4 normalSample = tex2D(_WaterNormal, uv_WaterNormal + farSample.rg * 0.05);
+	normalSample = lerp(normalSample, farSample,saturate(linearEyeDepth * _FarBumpSampleParams.y));
+	
+	fixed3 lerp_WaterNormal = UnpackScaleNormal(normalSample,_WaterNormalScale);
+	o.Normal = lerp_WaterNormal;*/
+
+	//float4 grabUV = IN.screenPos;	
+	//grabUV.xy += o.Normal.xz * _WaterRefraction;
+	//grabUV.xy += o.Normal.xz * _GrabTex_TexelSize.xy * _WaterRefraction;
+	
+	//float4 waterGrabColor = tex2D(_GrabTex, grabUV);
 
 	//half range = saturate(_WaterDepth * linearEyeDepth);
 	//range = 1.0 - range;
@@ -95,8 +124,12 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 
 	//o.Normal = GerstNormal(uv_WaterNormal);
 	//o.Emission = UnpackNormal(tex2D(_WaterNormal, GerstNormal(uv_WaterNormal)));
+
+	
+
+	//o.Emission = lerp(waterGrabColor, waterGrabColor*0.6, saturate(fresnel));
 	o.Specular = _Specular;
 	o.Smoothness = _Smoothness;
 	o.Occlusion = _Occlusion;
-	o.Alpha = linearEyeDepth;
+	o.Alpha = 1;
 }

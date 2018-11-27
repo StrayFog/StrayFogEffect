@@ -1,12 +1,17 @@
 Shader "Effect/Water/Water (Static)"
 {
 	Properties{
-		_GAmplitude("Wave Amplitude", Vector) = (0.3 ,0.35, 0.25, 0.25)
-		_GFrequency("Wave Frequency", Vector) = (1.3, 1.35, 1.25, 1.25)
-		_GSteepness("Wave Steepness", Vector) = (1.0, 1.0, 1.0, 1.0)
-		_GSpeed("Wave Speed", Vector) = (1.2, 1.375, 1.1, 1.5)
-		_GDirectionAB("Wave Direction", Vector) = (0.3 ,0.85, 0.85, 0.25)
-		_GDirectionCD("Wave Direction", Vector) = (0.1 ,0.9, 0.5, 0.5)
+		[Enum(Off,0,On,1)]_ZWrite("ZWrite", Float) = 1.0
+		[Enum(UnityEngine.Rendering.CullMode)] _Culling("Culling", Float) = 0
+
+		[Space(4)]
+		[Header(Water Settings ___________________________________________________)]
+		[Space(4)]
+		_WaterNormal("Water Normal", 2D) = "bump" {}
+		_WaterNormalScale("Water NormalScale",float) = 1
+		_WaterAngle("Water Angle",Range(0,360)) = 0
+		_WaterSpeed("Water Speed",float) = 0.1			
+		_WaterRefraction("Water Refraction",Range(0,512)) = 66
 
 		[Space(4)]
 		[Header(SurfaceOutput Settings ___________________________________________________)]
@@ -27,7 +32,12 @@ Shader "Effect/Water/Water (Static)"
 		[HideInInspector] __dirty("", Int) = 1
 	}
 	SubShader{
-		Tags{ "RenderType" = "Transparent"  "Queue" = "Geometry+999" "IgnoreProjector" = "True" "IsEmissive" = "true"  }
+		Tags{ "Queue" = "Transparent-1" "RenderType" = "Opaque" "IgnoreProjector" = "True" "IsEmissive" = "true"  }
+		ZWrite [_ZWrite]
+		ZTest LEqual
+		Cull [_Culling]
+		Blend SrcAlpha OneMinusSrcAlpha
+		
 		GrabPass { "_GrabTex" }
 
 		CGPROGRAM

@@ -1,0 +1,12 @@
+{
+    "name": "EditorStrayFogWater",
+    "references": [
+        "StrayFogWater"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}
