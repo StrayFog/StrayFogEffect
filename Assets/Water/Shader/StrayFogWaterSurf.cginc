@@ -64,10 +64,29 @@ void tessVert(inout appdata_full v)
 void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	//linearEyeDepth 像素深度
 	float linearEyeDepth = StrayFogLinearEyeDepth(_CameraDepthTexture, IN.screenPos);
-
 	float iTime = _Time.y;
+	half2 uv_WaterNormal = IN.uv_WaterNormal;
 
-	float t = _Time.x / 4;
+	fixed4 normalSample = tex2D(_WaterNormal, uv_WaterNormal);
+
+	o.Normal = Tonemap(UnpackScaleNormal(normalSample, _WaterNormalScale));
+
+
+	/*float4 _FarBumpSampleParams = float4(0.25, 0.01, 0, 0);
+	float2 _FinalBumpSpeed01 = RotationVector(float2(0, 1), _WaterAngle + 10).xy * _WaterSpeed;
+
+	fixed4 farSample = tex2D(_WaterNormal,
+		FBM(uv_WaterNormal, 0.5) +
+		_Time.x * _FinalBumpSpeed01 * _FarBumpSampleParams.x);
+
+	fixed4 normalSample = tex2D(_WaterNormal, FBM(uv_WaterNormal, 0.5) + farSample.rg * 0.05);
+	normalSample = lerp(normalSample, farSample, saturate(linearEyeDepth * _FarBumpSampleParams.y));
+
+	o.Normal = UnpackScaleNormal(normalSample, _WaterNormalScale);*/
+
+	//o.Normal = UnpackScaleNormal(tex2D(_WaterNormal,FBM(uv_WaterNormal, 0.5)), _WaterNormalScale);
+
+	/*float t = _Time.x / 4;
 	float2 uv_WaterNormal = IN.uv_WaterNormal;
 	uv_WaterNormal += t * 0.2;
 	float4 c1 = tex2D(_WaterNormal, uv_WaterNormal);
@@ -78,19 +97,19 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	c1 += c2 - c3;
 	float4 normal = (c1.x + c1.y + c1.z) / 3;
 
-	o.Normal = UnpackNormal(normal).xyz;
+	o.Normal = UnpackNormal(normal).xyz;*/
 
-	half fresnelFac = saturate(dot(IN.viewDir, o.Normal));
+	/*half fresnelFac = saturate(dot(IN.viewDir, o.Normal));
 
-	float4 grabUV = IN.screenPos;	
+	float4 grabUV = IN.screenPos;
 	grabUV.xy += o.Normal.xz * _GrabTex_TexelSize.xy * _WaterRefraction;
 	grabUV.xy /= grabUV.w;
-	float4 waterGrabColor = tex2Dproj(_GrabTex, grabUV);
+	float4 waterGrabColor = tex2Dproj(_GrabTex, grabUV);*/
 
-	o.Emission = lerp(waterGrabColor *0.5,waterGrabColor, fresnelFac);
+	//o.Emission = lerp(waterGrabColor *0.5,waterGrabColor, fresnelFac);
 
-	
-	
+
+
 
 	//half fresnel = sqrt(1.0 - dot(-normalize(IN.viewDir), o.Normal));
 
@@ -99,20 +118,20 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	float2 _FinalBumpSpeed01 = RotationVector(float2(0, 1), _WaterAngle + 10).xy * _WaterSpeed;
 	half2 uv_WaterNormal = IN.uv_WaterNormal;
 
-	fixed4 farSample = tex2D(_WaterNormal, 
+	fixed4 farSample = tex2D(_WaterNormal,
 		uv_WaterNormal +
 		_Time.x * _FinalBumpSpeed01 * _FarBumpSampleParams.x);
-	
+
 	fixed4 normalSample = tex2D(_WaterNormal, uv_WaterNormal + farSample.rg * 0.05);
 	normalSample = lerp(normalSample, farSample,saturate(linearEyeDepth * _FarBumpSampleParams.y));
-	
+
 	fixed3 lerp_WaterNormal = UnpackScaleNormal(normalSample,_WaterNormalScale);
 	o.Normal = lerp_WaterNormal;*/
 
 	//float4 grabUV = IN.screenPos;	
 	//grabUV.xy += o.Normal.xz * _WaterRefraction;
 	//grabUV.xy += o.Normal.xz * _GrabTex_TexelSize.xy * _WaterRefraction;
-	
+
 	//float4 waterGrabColor = tex2D(_GrabTex, grabUV);
 
 	//half range = saturate(_WaterDepth * linearEyeDepth);
@@ -125,9 +144,20 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	//o.Normal = GerstNormal(uv_WaterNormal);
 	//o.Emission = UnpackNormal(tex2D(_WaterNormal, GerstNormal(uv_WaterNormal)));
 
-	
-
 	//o.Emission = lerp(waterGrabColor, waterGrabColor*0.6, saturate(fresnel));
+
+	/*uv_WaterNormal = 0.5 - uv_WaterNormal;
+	float color = 3.0 - (3.*length(2.* uv_WaterNormal));
+
+	float3 coord = float3(atan(uv_WaterNormal.y / uv_WaterNormal.x) / 6.2832 + .5, length(uv_WaterNormal)*.4, .5);
+
+	for (int i = 1; i <= 7; i++)
+	{
+		float power = pow(2.0, float(i));
+		color += (1.5 / power) * snoise(coord + float3(0., -iTime * .05, iTime*.01), power*16.);
+	}
+	o.Emission = float3(color, pow(max(color, 0.), 2.)*0.4, pow(max(color, 0.), 3.)*0.15);*/
+
 	o.Specular = _Specular;
 	o.Smoothness = _Smoothness;
 	o.Occlusion = _Occlusion;
