@@ -8,10 +8,17 @@ Shader "Effect/Water/Water (Static)"
 		[Header(Water Settings ___________________________________________________)]
 		[Space(4)]
 		_WaterNormal("Water Normal", 2D) = "bump" {}
-		_WaterNormalScale("Water NormalScale",float) = 1
+		_WaterNormalScale("Water NormalScale",float) = 1		
 		_WaterAngle("Water Angle",Range(0,360)) = 0
-		_WaterSpeed("Water Speed",float) = 0.1			
+		_WaterOverlap("Water Overlap",Range(0,90)) = 5
+		_WaterSpeed("Water Speed",float) = 0.1
 		_WaterRefraction("Water Refraction",Range(0,512)) = 66
+
+		[Space(4)]
+		[Header(Water Foam Settings ___________________________________________________)]
+		[Space(4)]
+		_WaterFoam("Water Foam", 2D) = "white" {}
+		_WaterNoise("Water Noise", 2D) = "white" {}
 
 		[Space(4)]
 		[Header(SurfaceOutput Settings ___________________________________________________)]
@@ -45,6 +52,7 @@ Shader "Effect/Water/Water (Static)"
 		#include "Tessellation.cginc"
 		#include "StrayFogWaterSurf.cginc"
 		// Physically based Standard lighting model, and enable shadows on all light types
+		//StandardSpecular
 		#pragma surface tessSurf StandardSpecular keepalpha vertex:tessVert tessellate:tessFunction tessphong:_TessPhongStrength		
 		ENDCG
 	}

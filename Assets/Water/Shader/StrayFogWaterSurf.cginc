@@ -3,10 +3,18 @@
 #include "StrayFogRiver.cginc"
 //Water
 sampler2D _WaterNormal;
+float4 _WaterNormal_TexelSize;
 float _WaterNormalScale;
 float _WaterAngle;
+float _WaterOverlap;
 float _WaterSpeed;
 float _WaterRefraction;
+
+//Water Foam
+sampler2D _WaterFoam;
+
+//Water Noise
+sampler2D _WaterNoise;
 
 //Tessellate Mesh
 float _TessEdgeLength;
@@ -26,6 +34,7 @@ half _Occlusion;
 struct Input {
 	half2 uv_WaterNormal;
 	half2 uv_WaterFoam;
+	half2 uv_WaterNoise;
 	float3 worldNormal;
 	float3 viewDir;
 	float3 worldPos;
@@ -40,15 +49,6 @@ UNITY_INSTANCING_BUFFER_START(Props)
 // put more per-instance properties here
 UNITY_INSTANCING_BUFFER_END(Props)
 
-float2 RotationVector(float2 vec, float angle)
-{
-	float radZ = radians(-angle);
-	float sinZ, cosZ;
-	sincos(radZ, sinZ, cosZ);
-	return float2(vec.x * cosZ - vec.y * sinZ,
-		vec.x * sinZ + vec.y * cosZ);
-}
-
 //tessellate计算
 float4 tessFunction(appdata_full v0, appdata_full v1, appdata_full v2)
 {
@@ -61,18 +61,100 @@ void tessVert(inout appdata_full v)
 		_GSteepness, _GAmplitude, _GFrequency, _GSpeed, _GDirectionAB, _GDirectionCD);*/
 }
 
+
+
+//SurfaceOutputStandardSpecular
 void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	//linearEyeDepth 像素深度
 	float linearEyeDepth = StrayFogLinearEyeDepth(_CameraDepthTexture, IN.screenPos);
-	float iTime = _Time.y;
+
+	half4 waterFoam = tex2D(_WaterFoam, IN.uv_WaterFoam);
+	half4 waterNoise = tex2D(_WaterNoise, IN.uv_WaterNoise);
+
 	half2 uv_WaterNormal = IN.uv_WaterNormal;
+	//uv_WaterNormal += TimeNoiseFBM(_WaterNoise,uv_WaterNormal,_Time.x)*_WaterSpeed;	
 
-	fixed4 normalSample = tex2D(_WaterNormal, uv_WaterNormal);
+	float2 flowDir1 = RotationVector(float2(0, 1), _WaterAngle + _WaterOverlap);
+	float2 flowDir2 = RotationVector(float2(0, 1), _WaterAngle - _WaterOverlap);
+	
+	float2 norUV1 = uv_WaterNormal + flowDir1 * _Time.x * _WaterSpeed;
+	float2 norUV2 = uv_WaterNormal + flowDir2 * _Time.x * _WaterSpeed;
 
-	o.Normal = Tonemap(UnpackScaleNormal(normalSample, _WaterNormalScale));
+	float3 normal1 = UnpackScaleNormal(tex2D(_WaterNormal, norUV1), _WaterNormalScale);
+	float3 normal2 = UnpackScaleNormal(tex2D(_WaterNormal, norUV2), _WaterNormalScale);
 
+	o.Normal = lerp(normal1, normal2, waterNoise.r);
+	
+	/*float2 uv_Forward =  normalize(RotationVector(float2(0, 1), _WaterAngle));	
 
-	/*float4 _FarBumpSampleParams = float4(0.25, 0.01, 0, 0);
+	uv_WaterNormal += uv_Forward * _Time.x * _WaterSpeed;
+	o.Emission = tex2D(_WaterNormal, uv_WaterNormal); */
+	
+	// UnpackScaleNormal(tex2D(_WaterNormal, uv_WaterNormal), _WaterNormalScale);
+	
+	/*half4 noiseXY = tex2D(_WaterNoise, IN.uv_WaterNoise);
+	o.Emission = noiseXY.rgb;*/
+	/*uv_WaterNormal = IN.uv_WaterNormal + uv_ForwardA * _Time.x * _WaterSpeed;
+	float3 nor1 = UnpackScaleNormal(tex2D(_WaterNormal, uv_WaterNormal), _WaterNormalScale);
+
+	uv_WaterNormal = IN.uv_WaterNormal + uv_ForwardB * _Time.x * _WaterSpeed;
+	float3 nor2 = UnpackScaleNormal(tex2D(_WaterNormal, uv_WaterNormal), _WaterNormalScale);
+	
+	o.Normal = (nor1 + nor2) * 0.5;
+	float angle = dot(o.Normal, normalize(IN.viewDir));
+	angle = 0.95 - 0.6*angle*angle;*/
+	//o.Emission = angle;
+
+	//float offset = tex2D(_WaterNoise, IN.uv_WaterNoise).b;
+
+	/*uv_WaterNormal = lerp(uv_WaterNormal, uv_WaterNormal	+ _Time.x * 0.02,_Time.x * 0.02);
+
+	half4 noiseXY = tex2D(_WaterNoise, IN.uv_WaterNoise);
+	
+	uv_WaterNormal = map(uv_WaterNormal, _WaterNormalScale);
+	float3 ori = UnpackScaleNormal(tex2D(_WaterNormal, uv_WaterNormal), _WaterNormalScale);
+	o.Normal = ori;	*/
+	
+	//o.Emission =tex2D(_WaterFoam, IN.uv_WaterFoam);
+
+	/*fixed3 ori = UnpackScaleNormal(tex2D(_WaterNormal, uv_WaterNormal 
+		+ _Time.y * _WaterNormal_TexelSize.xy - _WaterNormal_TexelSize.xy), _WaterNormalScale);
+
+	fixed3 ori_ddy = UnpackScaleNormal(tex2D(_WaterNormal, uv_WaterNormal 
+		+ _Time.y * _WaterNormal_TexelSize.xy * 3),_WaterNormalScale);
+
+	o.Normal += lerp(ori,ori_ddy, abs(sin(_Time.y)));*/
+
+	//o.Normal += lerp(ori,ddxyOri,sin(_Time.y));
+	//SmoothNoise(normalSample.xy)
+	
+	//float3 vResult = 0;
+	//float fTot = 0;
+	//float g_fTime = _Time.x;
+	//float fBaseTime = 0;
+
+	//for (int i = 0; i < 3; i++)
+	//{
+	//	g_fTime = fBaseTime + (fTot / 10.0) / 30.0;
+	//	//vec3 vCurrRayDir = vRayDir;
+	//	float3 vRandom = float3(SmoothNoise(uv_WaterNormal.xy + fTot),
+	//		SmoothNoise(uv_WaterNormal.yx + fTot + 42.0),
+	//		SmoothNoise(uv_WaterNormal.xx + uv_WaterNormal.yy + fTot + 42.0)) * 2.0 - 1.0;
+	//	vRandom = normalize(vRandom);
+	//	o.Normal += vRandom;
+	//	/*vCurrRayDir += vRandom * 0.001;
+	//	vCurrRayDir = normalize(vCurrRayDir);
+	//	vResult += GetSceneColour(vRayOrigin, vCurrRayDir);*/
+	//	fTot += 1.0;
+	//}
+	////vResult /= fTot;
+	//o.Normal /= fTot;
+	/*fixed4 normalSample = tex2D(_WaterNormal, uv_WaterNormal);
+
+	o.Normal = Tonemap(UnpackScaleNormal(normalSample, _WaterNormalScale));*/
+	
+	/*
+	float4 _FarBumpSampleParams = float4(0.25, 0.01, 0, 0);
 	float2 _FinalBumpSpeed01 = RotationVector(float2(0, 1), _WaterAngle + 10).xy * _WaterSpeed;
 
 	fixed4 farSample = tex2D(_WaterNormal,

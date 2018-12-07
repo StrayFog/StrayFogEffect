@@ -168,7 +168,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _WaterFoam:
         m_Texture: {fileID: 2800000, guid: 6a660a7056facc941bce6ec6752b2f73, type: 3}
-        m_Scale: {x: 3, y: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WaterNoise:
+        m_Texture: {fileID: 2800000, guid: a2dd6fffa1319d44d80dc41ca1202722, type: 3}
+        m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _WaterNormal:
         m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
@@ -285,6 +289,7 @@ Material:
     - _WaterDirection: 0
     - _WaterDistort: 1
     - _WaterFalloffBorder: 8.46
+    - _WaterFlow: 6
     - _WaterFresnelBias: 1
     - _WaterFresnelPower: 5
     - _WaterFresnelScale: 1
@@ -293,13 +298,14 @@ Material:
     - _WaterNormalDistort: 0.03
     - _WaterNormalScale: 0.1
     - _WaterNormalSmooth: 1
+    - _WaterOverlap: 5
     - _WaterRefract: 200
     - _WaterRefractDistortion: 100
     - _WaterRefraction: 512
     - _WaterShalowTranslucencyPower: 0
     - _WaterSmoothness: 0.85
     - _WaterSpecular: 0.1
-    - _WaterSpeed: 0.1
+    - _WaterSpeed: 1
     - _WaterTessScale: 0.02
     - _WaterWaveOverlay: 20
     - _WaterWaveSpeed: 0.2

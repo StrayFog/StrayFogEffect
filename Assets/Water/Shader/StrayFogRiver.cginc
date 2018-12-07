@@ -1,4 +1,96 @@
-﻿#define DEF_MOD2 float2(4.438975,3.972973)
+﻿#define PI 3.14159265359
+#define PI2 6.28318530718
+#define Deg2Radius PI/180.
+#define Radius2Deg 180./PI
+
+//向量旋转
+float2 RotationVector(float2 vec, float angle)
+{
+	float radZ = radians(-angle);
+	float sinZ, cosZ;
+	sincos(radZ, sinZ, cosZ);
+	return normalize(float2(vec.x * cosZ - vec.y * sinZ,
+		vec.x * sinZ + vec.y * cosZ));
+}
+
+//Tiled坐标RTS转换
+float2 TiledRTS(float2 vec, float rotation, float2 offset, float scale,bool isClamp)
+{
+	half2 x0y0 = floor(vec * scale) / scale;
+	half2 center = x0y0 + 0.5 / scale;
+	half2 xy = (vec - x0y0) * scale;
+	float2 result = vec;
+	if (isClamp)
+	{
+		result = RotationVector(xy + offset - 0.5, rotation) + 0.5;
+	}
+	else
+	{
+		result = RotationVector(vec + offset - center, rotation) + center;
+	}
+	return result;
+}
+
+float TimeNoiseFBM(sampler2D t2d, float2 p, float t)
+{
+	float2 f = 0.0;
+	float s = 0.5;
+	float sum = 0;
+	for (int i = 0; i < 5; i++) {
+		p += t;//位置添加时间偏移
+		t *= 1.5;//每一层时间偏移不同 等到不同分层不同移速的效果
+		f += s * tex2D(t2d, p / 256).x; p = mul(float2x2(0.8, -0.6, 0.6, 0.8), p)*2.02;
+		sum += s; s *= 0.6;
+	}
+	return f / sum;
+}
+
+float hash(float n)
+{
+	return frac(sin(n)*43758.5453);
+}
+
+float fastNoise(in float2 x)
+{
+	float2 p = floor(x);
+	float2 f = frac(x);
+	f = f * f*(3.0 - 2.0*f);
+	float n = p.x + p.y*57.0;
+	return lerp(lerp(hash(n + 0.0), hash(n + 1.0), f.x),
+		lerp(hash(n + 57.0), hash(n + 58.0), f.x), f.y);
+}
+
+/*
+#define iTime _Time.x
+
+float hash(float n)
+{
+	return frac(sin(n)*43758.5453);
+}
+
+float fastNoise(in float2 x)
+{
+	float2 p = floor(x);
+	float2 f = frac(x);
+	f = f * f*(3.0 - 2.0*f);
+	float n = p.x + p.y*57.0;
+	return lerp(lerp(hash(n + 0.0), hash(n + 1.0), f.x),
+		lerp(hash(n + 57.0), hash(n + 58.0), f.x), f.y);
+}
+
+float2 map(float2 p, in float offset)
+{
+	p.x += 0.1*sin(iTime + 2.0*p.y);
+	p.y += 0.1*sin(iTime + 2.0*p.x);
+
+	float a = fastNoise(p*1.5 + sin(0.1*iTime))*6.2831;
+	a -= offset;
+	return float2(cos(a), sin(a));
+}
+*/
+
+/*
+#define DEF_MOD2 float2(4.438975,3.972973)
 #define DEF_FMBSTEPS float(6);
 #define  DEF_FMBWATERSTEPS int(4);
 
@@ -262,6 +354,19 @@ float4 SampleFlowingNormal(in float2 vUV, in float2 vFlowRate, in float fFoam, i
 	return result;
 }
 
+float3 ApplyVignetting(in float2 vUV, in float3 vInput)
+{
+	float2 vOffset = (vUV - 0.5) * sqrt(2.0);
+
+	float fDist = dot(vOffset, vOffset);
+
+	float kStrength = 0.8;
+
+	float fShade = lerp(1.0, 1.0 - kStrength, fDist);
+
+	return vInput * fShade;
+}
+
 float3 Tonemap(float3 x)
 {
 	float a = 0.010;
@@ -272,6 +377,53 @@ float3 Tonemap(float3 x)
 
 	return (x * (a * x + b)) / (x * (c * x + d) + e);
 }
+
+float tri(in float x) { return abs(frac(x) - .5); }
+
+float3 tri3(in float3 p) { return float3(tri(p.z + tri(p.y)), tri(p.z + tri(p.x)), tri(p.y + tri(p.x))); }
+
+float triNoise(in float3 p)
+{
+	float z = 1.4;
+	float rz = 0.;
+	float3 bp = p;
+	for (float i = 0.; i <= 4.; i++)
+	{
+		float3 dg = tri3(bp*2.);
+		p += dg;
+
+		bp *= 1.8;
+		z *= 1.5;
+		p *= 1.2;
+
+		rz += (tri(p.z + tri(p.x + tri(p.y)))) / z;
+		bp += 0.14;
+	}
+	return rz;
+}
+
+float GIV(float dotNV, float k)
+{
+	return 1.0 / ((dotNV + 0.0001) * (1.0 - k) + k);
+}
+
+float3 GetFresnel(float3 vView, float3 vNormal, float3 vR0, float fGloss)
+{
+	float NdotV = max(0.0, dot(vView, vNormal));
+
+	return vR0 + (1 - vR0) * pow(1.0 - NdotV, 5.0) * pow(fGloss, 20.0);
+}
+
+float3 GetWaterExtinction(float dist)
+{
+	float fOpticalDepth = dist * 6.0;
+
+	float3 vExtinctCol = 1.0 - float3(0.5, 0.4, 0.1);
+	float3 vExtinction = exp2(-fOpticalDepth * vExtinctCol);
+
+	return vExtinction;
+}
+*/
 
 //float snoise(float3 uv, float res)
 //{
