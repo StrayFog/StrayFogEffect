@@ -72,8 +72,30 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	half4 waterNoise = tex2D(_WaterNoise, IN.uv_WaterNoise);
 
 	half2 uv_WaterNormal = IN.uv_WaterNormal;
-	//uv_WaterNormal += TimeNoiseFBM(_WaterNoise,uv_WaterNormal,_Time.x)*_WaterSpeed;	
 
+	float2 flowDir = RotationVector(float2(0, 1), _WaterAngle + _WaterOverlap) * _WaterSpeed * _Time.x;
+	fixed4 farSample = tex2D(_WaterNormal, uv_WaterNormal + flowDir);
+	fixed4 normalSample = tex2D(_WaterNormal, uv_WaterNormal + farSample.ag * 0.05);	
+	float3 normal1 = UnpackScaleNormal(normalSample, _WaterNormalScale);
+
+	flowDir = RotationVector(float2(0, 1), _WaterAngle - _WaterOverlap) * _WaterSpeed * _Time.x;
+	farSample = tex2D(_WaterNormal, uv_WaterNormal + flowDir);
+	normalSample = tex2D(_WaterNormal, uv_WaterNormal + farSample.ag * 0.05);
+	float3 normal2 = UnpackScaleNormal(normalSample, _WaterNormalScale);
+
+	o.Normal = lerp(normal1, normal2, waterNoise.r);
+
+
+	/*
+	float2 offsetFactor = _GrabTexture_TexelSize.xy * _Refraction * perspectiveFadeFactor * edgeBlendFactor;			
+	float2 offset = worldNormal.xz * offsetFactor;
+	float4 distortedGrabUVs = IN.grabUV;
+	distortedGrabUVs.xy += offset;
+	*/
+
+	/*
+	//uv_WaterNormal += TimeNoiseFBM(_WaterNoise,uv_WaterNormal,_Time.x)*_WaterSpeed;
+	
 	float2 flowDir1 = RotationVector(float2(0, 1), _WaterAngle + _WaterOverlap);
 	float2 flowDir2 = RotationVector(float2(0, 1), _WaterAngle - _WaterOverlap);
 	
@@ -83,8 +105,30 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	float3 normal1 = UnpackScaleNormal(tex2D(_WaterNormal, norUV1), _WaterNormalScale);
 	float3 normal2 = UnpackScaleNormal(tex2D(_WaterNormal, norUV2), _WaterNormalScale);
 
-	o.Normal = lerp(normal1, normal2, waterNoise.r);
+	o.Normal = lerp(normal1, normal2, waterNoise.r);*/
+
 	
+	/*float3 worldView = normalize(_WorldSpaceCameraPos.xyz - IN.worldPos);
+	float3 worldNormal = WorldNormalVector(IN, o.Normal);
+
+	
+	float3 lightDirection = normalize(_WorldSpaceLightPos0 - IN.worldPos);
+	float3 viewReflectDirection = reflect(-worldView, worldNormal);
+
+
+	half fresnelTerm = 1.0 - saturate(dot(viewReflectDirection, lightDirection));
+
+	float _Specularity = 0.3;
+	float _SpecPower = 1;
+	half specular = pow(max(dot(viewReflectDirection, lightDirection), 0.0), 250.0 * _Specularity) * _SpecPower;
+
+	fresnelTerm = saturate(dot(worldView, viewReflectDirection));	
+	o.Emission = fresnelTerm ;*/
+
+	//lerp(float3 (.025, .2, .125), float3(0.196, 0.262, 0.196), fresnelTerm*0.6) + 
+
+	//o.Emission = float3 (.025, .2, .125) * dot(viewReflectDirection, lightDirection) * 5;
+
 	/*float2 uv_Forward =  normalize(RotationVector(float2(0, 1), _WaterAngle));	
 
 	uv_WaterNormal += uv_Forward * _Time.x * _WaterSpeed;
