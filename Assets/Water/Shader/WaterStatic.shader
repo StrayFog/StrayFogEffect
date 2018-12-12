@@ -13,6 +13,8 @@ Shader "Effect/Water/Water (Static)"
 		_WaterOverlap("Water Overlap",Range(0,90)) = 5
 		_WaterSpeed("Water Speed",float) = 0.1
 		_WaterRefraction("Water Refraction",Range(0,512)) = 66
+		_ShalowColor("Shalow Color", Color) = (0.23,0.34,0.2,1)
+		_DeepColor("Deep Color", Color) = (0,0.32,0.5,0)
 
 		[Space(4)]
 		[Header(Water Foam Settings ___________________________________________________)]
@@ -45,7 +47,7 @@ Shader "Effect/Water/Water (Static)"
 		Cull [_Culling]
 		Blend SrcAlpha OneMinusSrcAlpha
 		
-		GrabPass { "_GrabTex" }
+		GrabPass { "_GrabTexture" }
 
 		CGPROGRAM
 		#include "UnityCG.cginc"
