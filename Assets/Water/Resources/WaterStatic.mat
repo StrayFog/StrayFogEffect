@@ -296,7 +296,7 @@ Material:
     - _WaterMainSpeed: 1
     - _WaterMixSpeed: 0.01
     - _WaterNormalDistort: 0.03
-    - _WaterNormalScale: 0.5
+    - _WaterNormalScale: 0.3
     - _WaterNormalSmooth: 1
     - _WaterOverlap: 5
     - _WaterRefract: 200

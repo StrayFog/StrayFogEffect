@@ -61,8 +61,6 @@ void tessVert(inout appdata_full v)
 		_GSteepness, _GAmplitude, _GFrequency, _GSpeed, _GDirectionAB, _GDirectionCD);*/
 }
 
-
-
 //SurfaceOutputStandardSpecular
 void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	//linearEyeDepth 像素深度
@@ -73,18 +71,18 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 
 	half2 uv_WaterNormal = IN.uv_WaterNormal;
 
-	float2 flowDir = RotationVector(float2(0, 1), _WaterAngle + _WaterOverlap) * _WaterSpeed * _Time.x;
-	fixed4 farSample = tex2D(_WaterNormal, uv_WaterNormal + flowDir);
-	fixed4 normalSample = tex2D(_WaterNormal, uv_WaterNormal + farSample.ag * 0.05);	
-	float3 normal1 = UnpackScaleNormal(normalSample, _WaterNormalScale);
+	float2 flowDir1 = RotationVector(float2(0, 1), _WaterAngle + _WaterOverlap) * _WaterSpeed * _Time.x;
+	float4 farSample1 = tex2D(_WaterNormal, uv_WaterNormal + flowDir1);
+	float4 normalSample1 = tex2D(_WaterNormal, uv_WaterNormal + farSample1.xz * 0.05);
+	float3 normal1 = UnpackScaleNormal(normalSample1, _WaterNormalScale);
 
-	flowDir = RotationVector(float2(0, 1), _WaterAngle - _WaterOverlap) * _WaterSpeed * _Time.x;
-	farSample = tex2D(_WaterNormal, uv_WaterNormal + flowDir);
-	normalSample = tex2D(_WaterNormal, uv_WaterNormal + farSample.ag * 0.05);
-	float3 normal2 = UnpackScaleNormal(normalSample, _WaterNormalScale);
+	float2 flowDir2 = RotationVector(float2(0, 1), _WaterAngle - _WaterOverlap) * _WaterSpeed * _Time.x;
+	float4 farSample2 = tex2D(_WaterNormal, uv_WaterNormal + flowDir2);
+	float4 normalSample2 = tex2D(_WaterNormal, uv_WaterNormal + farSample2.yw * 0.05);
+	float3 normal2 = UnpackScaleNormal(normalSample2, _WaterNormalScale);
 
 	o.Normal = lerp(normal1, normal2, waterNoise.r);
-
+	o.Emission = lerp(normalSample1, normalSample2, waterNoise.r);
 
 	/*
 	float2 offsetFactor = _GrabTexture_TexelSize.xy * _Refraction * perspectiveFadeFactor * edgeBlendFactor;			
