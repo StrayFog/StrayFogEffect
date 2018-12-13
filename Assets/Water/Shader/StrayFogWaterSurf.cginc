@@ -77,14 +77,16 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 
 	//Normal
 	{
-		float2 flowDir1 = RotationVector(float2(0, 1), _WaterAngle + _WaterOverlap) * _WaterSpeed * _Time.x;
+		float overlapAngle = _WaterOverlap * sin(_Time.x + _WaterOverlap)* cos(_Time.x - _WaterOverlap) * 0.05;
+
+		float2 flowDir1 = RotationVector(float2(0, 1), _WaterAngle + overlapAngle) * _WaterSpeed * _Time.x;
 		float4 farSample1 = tex2D(_WaterNormal, uv_WaterNormal + flowDir1);
 		float4 normalSample1 = tex2D(_WaterNormal, uv_WaterNormal + 
 			flowDir1 * _Time.x * _WaterNormal_TexelSize.xy +
 			farSample1.xz * 0.05 * waterNoise.x);
 		float3 normal1 = UnpackScaleNormal(normalSample1 * farSample1, _WaterNormalScale);
 
-		float2 flowDir2 = RotationVector(float2(0, 1), _WaterAngle - _WaterOverlap) * _WaterSpeed * _Time.x;
+		float2 flowDir2 = RotationVector(float2(0, 1), _WaterAngle - overlapAngle) * _WaterSpeed * _Time.x;
 		float4 farSample2 = tex2D(_WaterNormal, uv_WaterNormal + flowDir2);
 		float4 normalSample2 = tex2D(_WaterNormal, uv_WaterNormal + 
 			flowDir2 * _Time.x * _WaterNormal_TexelSize.xy + 

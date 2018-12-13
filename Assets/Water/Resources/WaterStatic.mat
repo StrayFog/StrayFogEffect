@@ -299,14 +299,14 @@ Material:
     - _WaterNormalDistort: 0.03
     - _WaterNormalScale: 0.3
     - _WaterNormalSmooth: 1
-    - _WaterOverlap: 5
+    - _WaterOverlap: 1
     - _WaterRefract: 200
     - _WaterRefractDistortion: 100
     - _WaterRefraction: 1
     - _WaterShalowTranslucencyPower: 0
     - _WaterSmoothness: 0.85
     - _WaterSpecular: 0.1
-    - _WaterSpeed: 1
+    - _WaterSpeed: 0.5
     - _WaterTessScale: 0.02
     - _WaterWaveOverlay: 20
     - _WaterWaveSpeed: 0.2

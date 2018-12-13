@@ -45,22 +45,6 @@ float TimeNoiseFBM(sampler2D t2d, float2 p, float t)
 	return f / sum;
 }
 
-float hash(float n)
-{
-	return frac(sin(n)*43758.5453);
-}
-
-float fastNoise(in float2 x)
-{
-	float2 p = floor(x);
-	float2 f = frac(x);
-	f = f * f*(3.0 - 2.0*f);
-	float n = p.x + p.y*57.0;
-	return lerp(lerp(hash(n + 0.0), hash(n + 1.0), f.x),
-		lerp(hash(n + 57.0), hash(n + 58.0), f.x), f.y);
-}
-
-/*
 #define iTime _Time.x
 
 float hash(float n)
@@ -87,7 +71,7 @@ float2 map(float2 p, in float offset)
 	a -= offset;
 	return float2(cos(a), sin(a));
 }
-*/
+
 
 /*
 #define DEF_MOD2 float2(4.438975,3.972973)
