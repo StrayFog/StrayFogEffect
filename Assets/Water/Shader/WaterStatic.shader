@@ -15,6 +15,7 @@ Shader "Effect/Water/Water (Static)"
 		_WaterRefraction("Water Refraction",Range(0,512)) = 66
 		_ShalowColor("Shalow Color", Color) = (0.23,0.34,0.2,1)
 		_DeepColor("Deep Color", Color) = (0,0.32,0.5,0)
+		_ShalowDeepFactor("Shalow Deep Factor (Deep,Power,)",Vector) = (0.17,2,0,0)
 
 		[Space(4)]
 		[Header(Water Foam Settings ___________________________________________________)]

@@ -250,6 +250,7 @@ Material:
     - _RefractAmount: 1
     - _RefractDistortion: 300
     - _RefractRatio: 1
+    - _ShalowDeepDepthFactor: 0.17
     - _ShalowDepth: 0.7
     - _ShalowFalloff: -1.2
     - _Shininess: 1
@@ -344,6 +345,7 @@ Material:
     - _RefrColor: {r: 1, g: 1, b: 1, a: 1}
     - _ShallowColor: {r: 0.38349944, g: 0.5849056, b: 0.52082187, a: 1}
     - _ShalowColor: {r: 0.23137255, g: 0.34901962, b: 0.2, a: 1}
+    - _ShalowDeepFactor: {r: 0.17, g: 3, b: 0, a: 0}
     - _SmallCascadeColor: {r: 20, g: 20, b: 20, a: 0}
     - _SmallCascadeMainSpeed: {r: 0, g: 0.16, b: 0, a: 0}
     - _SmallCascadeMixSpeed: {r: 0.02, g: 0.07, b: 0, a: 0}
