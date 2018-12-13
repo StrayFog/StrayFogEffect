@@ -120,7 +120,7 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	half diffuse = max(dot(worldNormal, worldLightDir), 0);
 
 	float3 ambient = UNITY_LIGHTMODEL_AMBIENT.rgb;
-	waterColor.rgb *= diffuse;
+	waterColor.rgb = ambient * pow(diffuse,5);
 	
 	/*
 	float3 lightDirection = normalize(IN.worldPos - _WorldSpaceLightPos0);
