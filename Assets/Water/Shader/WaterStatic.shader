@@ -12,7 +12,7 @@ Shader "Effect/Water/Water (Static)"
 		_WaterAngle("Water Angle",Range(0,360)) = 0
 		_WaterOverlap("Water Overlap",Range(0,90)) = 5
 		_WaterSpeed("Water Speed",float) = 0.1
-		_WaterRefraction("Water Refraction",Range(0,512)) = 66
+		_WaterRefraction("Water Refraction",Range(0,1)) = 0.5
 		_ShalowColor("Shalow Color", Color) = (0.23,0.34,0.2,1)
 		_DeepColor("Deep Color", Color) = (0,0.32,0.5,0)
 		_ShalowDeepFactor("Shalow Deep Factor (Deep,Power,)",Vector) = (0.17,2,0,0)

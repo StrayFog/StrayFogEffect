@@ -79,13 +79,17 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	{
 		float2 flowDir1 = RotationVector(float2(0, 1), _WaterAngle + _WaterOverlap) * _WaterSpeed * _Time.x;
 		float4 farSample1 = tex2D(_WaterNormal, uv_WaterNormal + flowDir1);
-		float4 normalSample1 = tex2D(_WaterNormal, uv_WaterNormal + farSample1.xz * 0.05 * waterNoise.x);
-		float3 normal1 = UnpackScaleNormal(normalSample1, _WaterNormalScale);
+		float4 normalSample1 = tex2D(_WaterNormal, uv_WaterNormal + 
+			flowDir1 * _Time.x * _WaterNormal_TexelSize.xy +
+			farSample1.xz * 0.05 * waterNoise.x);
+		float3 normal1 = UnpackScaleNormal(normalSample1 * farSample1, _WaterNormalScale);
 
 		float2 flowDir2 = RotationVector(float2(0, 1), _WaterAngle - _WaterOverlap) * _WaterSpeed * _Time.x;
 		float4 farSample2 = tex2D(_WaterNormal, uv_WaterNormal + flowDir2);
-		float4 normalSample2 = tex2D(_WaterNormal, uv_WaterNormal + farSample2.yw * 0.05 * waterNoise.x);
-		float3 normal2 = UnpackScaleNormal(normalSample2, _WaterNormalScale);
+		float4 normalSample2 = tex2D(_WaterNormal, uv_WaterNormal + 
+			flowDir2 * _Time.x * _WaterNormal_TexelSize.xy + 
+			farSample2.yw * 0.05 * waterNoise.x);
+		float3 normal2 = UnpackScaleNormal(normalSample2* farSample2, _WaterNormalScale);
 
 		o.Normal = BlendNormals(normal1, normal2);
 	}
@@ -97,27 +101,21 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	//GrabTexture Color
 	float4 waterGrabColor = 0;
 	{
-		float2 offsetFactor = _GrabTexture_TexelSize.xy * saturate(linearEyeDepth);
-		float2 offset = worldNormal.xz * offsetFactor;
-		float4 distortedGrabUVs = IN.screenPos;
-		distortedGrabUVs.xy += offset;
-		float2 snappedDistortedGrabUVs = distortedGrabUVs.xy / distortedGrabUVs.w;
-
 		float4 grabUV = IN.screenPos;
-		grabUV.xy += worldNormal.xz * saturate(linearEyeDepth);// *_GrabTexture_TexelSize.xy *  _WaterRefraction;
+		grabUV.xy += worldNormal.xz * _WaterRefraction * saturate(linearEyeDepth);// *_GrabTexture_TexelSize.xy *  _WaterRefraction;
 		waterGrabColor = tex2Dproj(_GrabTexture, grabUV);
 	}
 
 	//Water Color
 	float4 waterColor = 0;
 	{
-		half depth = saturate(_ShalowDeepFactor.x * linearEyeDepth);
+		half depth = saturate(linearEyeDepth  *  _ShalowDeepFactor.x);
 		depth = 1 - depth;
 		depth = lerp(depth,pow(depth, _ShalowDeepFactor.y), waterNoise.r);
-		waterColor = lerp(_DeepColor, _ShalowColor, depth);
+		waterColor = lerp(_DeepColor, _ShalowColor, depth*waterNoise.r);
 	}
 
-	float fresnel = pow(worldViewFresnel, 3);
+	float fresnel = pow(worldViewFresnel, _ShalowDeepFactor.y);
 
 	//Emission
 	o.Emission = lerp(waterColor, waterGrabColor, fresnel);
