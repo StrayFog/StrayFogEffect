@@ -77,7 +77,7 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 
 	//Normal
 	{
-		float overlapAngle = _WaterOverlap * sin(_Time.x + _WaterOverlap)* cos(_Time.x - _WaterOverlap) * 0.05;
+		float overlapAngle = _WaterOverlap  * sin(_Time.x + _WaterOverlap) * cos(_Time.x - _WaterOverlap) * 0.05;
 
 		float2 flowDir1 = RotationVector(float2(0, 1), _WaterAngle + overlapAngle) * _WaterSpeed * _Time.x;
 		float4 farSample1 = tex2D(_WaterNormal, uv_WaterNormal + flowDir1);
@@ -98,12 +98,7 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	
 	float3 worldNormal = normalize(WorldNormalVector(IN, o.Normal));
 	float3 worldView = normalize(IN.worldPos - _WorldSpaceCameraPos.xyz);
-
-	float3 viewReflectDirection = reflect(-worldView, worldNormal);
-	float3 lightDirection = normalize(_WorldSpaceLightPos0.xyz);
-	float3 halfDirection = normalize(worldView + lightDirection);
-	
-	half worldViewFresnel = sqrt(1.0 - dot(-worldView, worldNormal));
+		
 	//GrabTexture Color
 	float4 waterGrabColor = 0;
 	{
@@ -121,13 +116,35 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 		waterColor = lerp(_DeepColor, _ShalowColor, depth);
 	}
 
-	float fresnel = pow(worldViewFresnel, 3) * 0.8;
+	float3  worldLightDir = UnityWorldSpaceLightDir(IN.worldPos);
+	half diffuse = max(dot(worldNormal, worldLightDir), 0);
+
+	float3 ambient = UNITY_LIGHTMODEL_AMBIENT.rgb;
+	waterColor.rgb *= diffuse;
+	
+	/*
+	float3 lightDirection = normalize(IN.worldPos - _WorldSpaceLightPos0);
+	float3 halfDirection = normalize(worldView + lightDirection);
+	float3 viewReflectDirection = reflect(-worldView, worldNormal);
+	
+	half NdotV = max(0, dot(worldNormal, worldView));
+	half halfVL = max(0, dot(worldNormal, halfDirection));
+
+	half worldViewFresnel = sqrt(1.0 - dot(-worldView, worldNormal));
+
+	half factor = 0.5;
+	float fresnel = factor + (1.0 - factor)*pow((dot(worldNormal, lightDirection)), 5);
+	//fresnel = fresnel * (factor + (1.0 - factor)*pow((1.0 - NdotV), 5));
+	//fresnel = saturate(max(fresnel, factor + (1.0 - factor)*pow((1.0 - NdotV), 5)));
+
 	float4 resultColor = lerp(waterColor * waterGrabColor, waterGrabColor, fresnel);
 	//Emission
+
+	o.Emission = resultColor;*/
 
 	o.Emission = waterColor;
 	o.Specular = _Specular;
 	o.Smoothness = _Smoothness;
 	o.Occlusion = _Occlusion;
-	o.Alpha = resultColor.a;
+	o.Alpha = 1;
 }

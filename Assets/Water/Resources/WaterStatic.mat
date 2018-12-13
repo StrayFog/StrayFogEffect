@@ -306,7 +306,7 @@ Material:
     - _WaterShalowTranslucencyPower: 0
     - _WaterSmoothness: 0.85
     - _WaterSpecular: 0.1
-    - _WaterSpeed: 0.5
+    - _WaterSpeed: 0.3
     - _WaterTessScale: 0.02
     - _WaterWaveOverlay: 20
     - _WaterWaveSpeed: 0.2
