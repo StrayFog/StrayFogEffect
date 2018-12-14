@@ -82,30 +82,29 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 		float2 flowDir1 = RotationVector(float2(0, 1), _WaterAngle + overlapAngle) * _WaterSpeed * _Time.x;
 		float4 farSample1 = tex2D(_WaterNormal, uv_WaterNormal + flowDir1);
 		float4 normalSample1 = tex2D(_WaterNormal, uv_WaterNormal + 
-			flowDir1 * _Time.x * _WaterNormal_TexelSize.xy +
+			flowDir1 * _Time.y * _WaterNormal_TexelSize.xy * _WaterSpeed +
 			farSample1.xz * 0.05 * waterNoise.x);
 		float3 normal1 = UnpackScaleNormal(normalSample1 * farSample1, _WaterNormalScale);
 
 		float2 flowDir2 = RotationVector(float2(0, 1), _WaterAngle - overlapAngle) * _WaterSpeed * _Time.x;
 		float4 farSample2 = tex2D(_WaterNormal, uv_WaterNormal + flowDir2);
 		float4 normalSample2 = tex2D(_WaterNormal, uv_WaterNormal + 
-			flowDir2 * _Time.x * _WaterNormal_TexelSize.xy + 
+			flowDir2 * _Time.y * _WaterNormal_TexelSize.xy * _WaterSpeed +
 			farSample2.yw * 0.05 * waterNoise.x);
 		float3 normal2 = UnpackScaleNormal(normalSample2* farSample2, _WaterNormalScale);
 
 		o.Normal = BlendNormals(normal1, normal2);
 	}
 	
-	float3 worldNormal = normalize(WorldNormalVector(IN, o.Normal));
-	float3 worldView = normalize(IN.worldPos - _WorldSpaceCameraPos.xyz);
-		
-	//GrabTexture Color
-	float4 waterGrabColor = 0;
-	{
-		float4 grabUV = IN.screenPos;
-		grabUV.xy += worldNormal.xz * _WaterRefraction * saturate(linearEyeDepth);// *_GrabTexture_TexelSize.xy *  _WaterRefraction;
-		waterGrabColor = tex2Dproj(_GrabTexture, grabUV);
-	}
+	float3 worldNormal = WorldNormalVector(IN, o.Normal);
+	float3 worldView = UnityObjectToWorldDir(IN.viewDir);
+	float3  worldLightDir = UnityWorldSpaceLightDir(IN.worldPos);
+
+	//ambient
+	float3 ambient = UNITY_LIGHTMODEL_AMBIENT.rgb;
+
+	//halfLambert
+	fixed halfLambert = dot(worldNormal, worldLightDir) * 0.5 + 0.5;
 
 	//Water Color
 	float4 waterColor = 0;
@@ -113,15 +112,20 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 		half depth = saturate(linearEyeDepth  *  _ShalowDeepFactor.x);
 		depth = 1 - depth;
 		depth = lerp(depth, pow(depth, _ShalowDeepFactor.y), waterNoise.x);
-		waterColor = lerp(_DeepColor, _ShalowColor, depth);
+		waterColor = lerp(_DeepColor, _ShalowColor, depth);		
+		
+		waterColor.rgb *= halfLambert;
 	}
 
-	float3  worldLightDir = UnityWorldSpaceLightDir(IN.worldPos);
-	half diffuse = max(dot(worldNormal, worldLightDir), 0);
+	//GrabTexture Color
+	float4 waterGrabColor = 0;
+	{
+		float4 grabUV = IN.screenPos;
+		grabUV.xy += worldNormal.xz * _WaterRefraction * saturate(linearEyeDepth);// *_GrabTexture_TexelSize.xy *  _WaterRefraction;
+		waterGrabColor = tex2Dproj(_GrabTexture, grabUV);			
+		//waterColor = waterColor * waterGrabColor;
+	}
 
-	float3 ambient = UNITY_LIGHTMODEL_AMBIENT.rgb;
-	waterColor.rgb = ambient * pow(diffuse,5);
-	
 	/*
 	float3 lightDirection = normalize(IN.worldPos - _WorldSpaceLightPos0);
 	float3 halfDirection = normalize(worldView + lightDirection);
