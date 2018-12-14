@@ -104,7 +104,9 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	float3 ambient = UNITY_LIGHTMODEL_AMBIENT.rgb;
 
 	//halfLambert
-	fixed halfLambert = dot(worldNormal, worldLightDir) * 0.5 + 0.5;
+	half halfLambert = dot(worldNormal, worldLightDir) * 0.5 + 0.5;
+	//lambert
+	half lambert = max(dot(worldNormal, worldLightDir), 0);
 
 	//Water Color
 	float4 waterColor = 0;
@@ -114,7 +116,7 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 		depth = lerp(depth, pow(depth, _ShalowDeepFactor.y), waterNoise.x);
 		waterColor = lerp(_DeepColor, _ShalowColor, depth);		
 		
-		waterColor.rgb *= halfLambert;
+		waterColor.rgb *= lambert;
 	}
 
 	//GrabTexture Color
@@ -122,15 +124,21 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	{
 		float4 grabUV = IN.screenPos;
 		grabUV.xy += worldNormal.xz * _WaterRefraction * saturate(linearEyeDepth);// *_GrabTexture_TexelSize.xy *  _WaterRefraction;
-		waterGrabColor = tex2Dproj(_GrabTexture, grabUV);			
-		//waterColor = waterColor * waterGrabColor;
+		waterGrabColor = tex2Dproj(_GrabTexture, grabUV);
 	}
 
-	/*
+	o.Emission = waterColor;
+	o.Specular = _Specular;
+	o.Smoothness = _Smoothness;
+	o.Occlusion = _Occlusion;
+	o.Alpha = waterColor.a;
+}
+
+/*
 	float3 lightDirection = normalize(IN.worldPos - _WorldSpaceLightPos0);
 	float3 halfDirection = normalize(worldView + lightDirection);
 	float3 viewReflectDirection = reflect(-worldView, worldNormal);
-	
+
 	half NdotV = max(0, dot(worldNormal, worldView));
 	half halfVL = max(0, dot(worldNormal, halfDirection));
 
@@ -145,10 +153,3 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	//Emission
 
 	o.Emission = resultColor;*/
-
-	o.Emission = waterColor;
-	o.Specular = _Specular;
-	o.Smoothness = _Smoothness;
-	o.Occlusion = _Occlusion;
-	o.Alpha = 1;
-}
