@@ -4,7 +4,7 @@
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.TextureShaderProperty"
             },
-            "JSONnodeData": "{\n    \"m_Value\": {\n        \"m_SerializedTexture\": \"\",\n        \"m_Guid\": \"d9d17838266f95a45a8794580b3f7410\"\n    },\n    \"m_Name\": \"Normal\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"b03c6eb3-98a6-47ff-a49a-c43460a03503\"\n    },\n    \"m_OverrideReferenceName\": \"\",\n    \"m_Modifiable\": true\n}"
+            "JSONnodeData": "{\n    \"m_Value\": {\n        \"m_SerializedTexture\": \"\",\n        \"m_Guid\": \"d9d17838266f95a45a8794580b3f7410\"\n    },\n    \"m_Name\": \"Normal\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"b03c6eb3-98a6-47ff-a49a-c43460a03503\"\n    },\n    \"m_OverrideReferenceName\": \"_NormalTex\",\n    \"m_Modifiable\": true\n}"
         }
     ],
     "m_GUID": {
@@ -50,5 +50,5 @@
             "m_Guid": ""
         }
     },
-    "m_Path": ""
+    "m_Path": "StrayFog/Nature"
 }
