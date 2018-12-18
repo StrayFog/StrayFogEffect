@@ -1,0 +1,12 @@
+{
+    "name": "EditorOldWater",
+    "references": [
+        "OldWater"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}
