@@ -587,7 +587,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 430372, guid: e05b3e8a9e80e034c86657cc7993378e, type: 2}
       propertyPath: m_RootOrder
-      value: 4
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 145808, guid: e05b3e8a9e80e034c86657cc7993378e, type: 2}
       propertyPath: m_Name
@@ -765,7 +765,7 @@ Mesh:
   m_MeshUsageFlags: 0
   m_BakedConvexCollisionMesh: 
   m_BakedTriangleCollisionMesh: 
-  m_MeshMetrics[0]: 100.000015
+  m_MeshMetrics[0]: 1000
   m_MeshMetrics[1]: 1
   m_MeshOptimized: 0
 --- !u!1 &1696680342
