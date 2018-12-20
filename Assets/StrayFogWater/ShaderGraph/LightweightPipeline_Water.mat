@@ -30,8 +30,20 @@ Material:
         m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 7c69be058bc42374fa65702f9285ebdf, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _NormalTex:
-        m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
+        m_Texture: {fileID: 2800000, guid: 6f158ea068bd34f4ea4b7b1cdde03a1c, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_5D7BDF04_Texture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Subgraph_736D577_NoiseTex:
+        m_Texture: {fileID: 2800000, guid: 7c69be058bc42374fa65702f9285ebdf, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Texture2DAsset_E58795B8_Out:
@@ -41,8 +53,15 @@ Material:
     m_Floats:
     - Vector1_9B10DBB1: 0
     - _ForwardAngle: 0
-    - _ForwardPowFactor: 0.5
+    - _ForwardPowFactor: 0.708
     - _ForwardSpeed: 0.01
     - _NormalForwardAngle: 0
+    - _NormalForwardPowFactor: 0.6
+    - _NormalForwardSpeed: 0.1
+    - _NormalOverlap: 1
+    - _NormalStrength: 1
     m_Colors:
     - Color_10987921: {r: 0.5351658, g: 1, b: 0, a: 0}
+    - Vector2_FAE827AF: {r: 0, g: 0, b: 0, a: 0}
+    - _NormalTiling: {r: 1, g: 1, b: 0, a: 0}
+    - _NormalTilingAndOffset: {r: 1, g: 1, b: 0, a: 0}
