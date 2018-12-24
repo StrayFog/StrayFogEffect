@@ -120,10 +120,18 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	float linearEyeDepth = StrayFogLinearEyeDepth(_CameraDepthTexture, IN.screenPos);
 
 	float d = tex2D(_TesselationTex, IN.uv_TesselationTex).r * _TessDisplacement;
+
+	half2 uv_NormalTex2D = IN.uv_NormalTex2D;
+	half2 flowSpeed = StrayFogRotateAround(float2(0, 1), _WaterAngle) * _WaterSpeed * _Time.x;
 	
+	half4 CnormalTex0 = tex2D(_NormalTex2D, uv_NormalTex2D + flowSpeed);
+	half4 CnormalTex1 = tex2D(_NormalTex2D, uv_NormalTex2D * 0.75 - (flowSpeed*0.25));
+	half3 cNormal = BlendNormals(UnpackScaleNormal(CnormalTex0, _NormalScale), UnpackScaleNormal(CnormalTex1, _NormalScale));
+	o.Normal = cNormal;
+
 //	half4 waterFoam = tex2D(_FoamTex2D, IN.uv_FoamTex2D);
 //	half4 waterNoise = tex2D(_NoiseTex2D, IN.uv_NoiseTex2D +
-//		StrayFogRotateAround(float2(0, 1), _Time.x * _WaterSpeed));
+//		StrayFogRotateAround(float2(0, 1), _Time.x * _WaterAngle));
 //
 //	half2 uv_NormalTex2D = IN.uv_NormalTex2D;
 //	//Normal
@@ -155,7 +163,8 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 	float3  worldLightDir = UnityWorldSpaceLightDir(IN.worldPos);
 	float3 worldReflect = reflect(-worldView, worldNormal);
 
-	o.Emission = dot(worldReflect, worldLightDir);
+	o.Albedo = 0.5;
+	o.Emission = 0;
 	o.Specular = _Specular;
 	o.Smoothness = _Smoothness;
 	o.Occlusion = _Occlusion;

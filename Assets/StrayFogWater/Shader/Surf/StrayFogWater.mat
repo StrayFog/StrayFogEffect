@@ -99,7 +99,7 @@ Material:
     - _Speed: 1
     - _SrcBlend: 1
     - _Steepness: 1
-    - _TessDisplacement: 10
+    - _TessDisplacement: 1
     - _TessEdgeLength: 25
     - _TessMaxDisp: 20
     - _TessPhongStrength: 0.5
