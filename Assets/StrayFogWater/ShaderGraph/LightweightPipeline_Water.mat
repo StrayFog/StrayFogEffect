@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: LightweightPipeline_Water
-  m_Shader: {fileID: 4800000, guid: a371719606b11044e9935c654e02f833, type: 3}
+  m_Shader: {fileID: 4800000, guid: 8092b190ad64ca24d94bc724a4885be6, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -66,6 +66,10 @@ Material:
         m_Texture: {fileID: 2800000, guid: 3b6787cffd0a4434796a5ee04144e381, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Texture2DAsset_5F1BC166_Out:
+        m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _Texture2DAsset_E58795B8_Out:
         m_Texture: {fileID: 2800000, guid: d9d17838266f95a45a8794580b3f7410, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -90,7 +94,7 @@ Material:
     - Vector1_3C50798A: 0.001
     - Vector1_9B10DBB1: 0
     - _Culling: 0
-    - _FlowPowFactor: 0.5
+    - _FlowPowFactor: 1
     - _FlowScaleFactor: 0.05
     - _ForwardAngle: 0
     - _ForwardPowFactor: 0.708

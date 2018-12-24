@@ -52,7 +52,7 @@
 		_TessEdgeLength("Edge length", Range(2, 50)) = 25
 		_TessMaxDisp("Max Displacement", Float) = 20
 		_TessPhongStrength("Phong Tess Strength", Range(0, 1)) = 0.5
-		_TessDisplacement("Displacement", Range(0, 1)) = 0.3
+		_TessDisplacement("Displacement", Range(0, 10)) = 0.3
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
