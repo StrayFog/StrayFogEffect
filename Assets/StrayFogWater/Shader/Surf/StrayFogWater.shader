@@ -1,5 +1,5 @@
 ﻿Shader "StrayFog/Nature/Water" {
-	Properties {
+	Properties{
 		[Enum(Off,0,On,1)]_ZWrite("ZWrite", Float) = 1.0
 		[Enum(UnityEngine.Rendering.CullMode)] _Culling("Culling", Float) = 0
 
@@ -8,11 +8,11 @@
 		[Space(4)]
 		[KeywordEnum(Off,Gerstner)]
 		_WaveFeature("Wave", Float) = 0
-
-		[Space(5)]
-		[LuxWaterVectorThreeDrawer]
-		_GerstnerVertexIntensity("    Final Displacement", Vector) = (1.0,1.0,1.0,0.0)
+		[StrayFogWaterVectorThreeDrawer] //see class MaterialPropertyDrawer
+		_GerstnerVertexIntensity("Gerstner Vertex Intensity", Vector) = (0,0.12,0.05,0.0)
+		_GerstnerNormalIntensity("Gerstner Normal Intensity", Range(0,1)) = 0.01
 	}
+
 	SubShader {
 		Tags {"Queue" = "Transparent-1" "RenderType" = "Opaque" "ForceNoShadowCasting" = "True"}
 		LOD 200

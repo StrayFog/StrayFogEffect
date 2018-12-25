@@ -34,6 +34,7 @@ struct Input {
 
 //Wave
 float4 _GerstnerVertexIntensity;
+float _GerstnerNormalIntensity;
 
 // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
 // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
@@ -45,6 +46,9 @@ UNITY_INSTANCING_BUFFER_END(Props)
 void StrayFogVert(inout appdata_full v,out Input o)
 {
 	UNITY_INITIALIZE_OUTPUT(Input, o);
+
+	float4 wpos = mul(unity_ObjectToWorld, float4(v.vertex.xyz, 1.0));
+
 #ifdef _WAVEFEATURE_GERSTNER
 #endif
 }
