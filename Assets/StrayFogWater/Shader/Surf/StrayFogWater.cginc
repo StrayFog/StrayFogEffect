@@ -12,6 +12,7 @@ float _WaterSpeed;
 float _WaterRefraction;
 float4 _ShalowColor;
 float4 _DeepColor;
+float4 _ShalowDeepFactor;
 
 //Water Wave
 float _NormalSmoothing;
@@ -116,18 +117,46 @@ void StrayFogVert(inout appdata_full v)
 
 //SurfaceOutputStandardSpecular
 void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
-	//linearEyeDepth 像素深度
-	float linearEyeDepth = StrayFogLinearEyeDepth(_CameraDepthTexture, IN.screenPos);
-
+	float eyeDepth = StrayFogLinearEyeDepth(_CameraDepthTexture, IN.screenPos);
 	float d = tex2D(_TesselationTex, IN.uv_TesselationTex).r * _TessDisplacement;
 
+	//Normal
 	half2 uv_NormalTex2D = IN.uv_NormalTex2D;
-	half2 flowSpeed = StrayFogRotateAround(float2(0, 1), _WaterAngle) * _WaterSpeed * _Time.x;
-	
+	half2 flowSpeed = StrayFogRotateAround(float2(0, 1), _WaterAngle) * _WaterSpeed * _Time.x;	
 	half4 CnormalTex0 = tex2D(_NormalTex2D, uv_NormalTex2D + flowSpeed);
 	half4 CnormalTex1 = tex2D(_NormalTex2D, uv_NormalTex2D * 0.75 - (flowSpeed*0.25));
 	half3 cNormal = BlendNormals(UnpackScaleNormal(CnormalTex0, _NormalScale), UnpackScaleNormal(CnormalTex1, _NormalScale));
 	o.Normal = cNormal;
+
+	//WorldNormal
+	float3 worldNormal = WorldNormalVector(IN, o.Normal);
+	//WorldView
+	float3 worldView = UnityObjectToWorldDir(IN.viewDir);
+#ifdef CULL_FRONT
+	worldView = -worldView;
+#endif
+	//WorldLight
+	float3  worldLightDir = UnityWorldSpaceLightDir(IN.worldPos);
+	float3 worldReflect = reflect(-worldView, worldNormal);
+
+	half4 waterFoam = tex2D(_FoamTex2D, IN.uv_FoamTex2D);
+	half4 waterNoise = tex2D(_NoiseTex2D, IN.uv_NoiseTex2D +
+		StrayFogRotateAround(float2(0, 1), _Time.x * _WaterAngle));
+
+	//Depth
+	half depth = saturate(eyeDepth  *  _ShalowDeepFactor.x);
+	depth = 1 - depth;
+	depth = lerp(depth, pow(depth, _ShalowDeepFactor.y), waterNoise.x);
+
+	float4 finalColor = lerp(_DeepColor, _ShalowColor, depth);
+
+	o.Albedo = depth;
+	o.Emission = finalColor;
+	o.Specular = _Specular;
+	o.Smoothness = _Smoothness;
+	o.Occlusion = _Occlusion;
+}
+#endif
 
 //	half4 waterFoam = tex2D(_FoamTex2D, IN.uv_FoamTex2D);
 //	half4 waterNoise = tex2D(_NoiseTex2D, IN.uv_NoiseTex2D +
@@ -155,18 +184,3 @@ void tessSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 //		o.Normal = BlendNormals(normal1, normal2);
 //	}
 //
-	float3 worldNormal = WorldNormalVector(IN, o.Normal);
-	float3 worldView = UnityObjectToWorldDir(IN.viewDir);
-#ifdef CULL_FRONT
-	worldView = -worldView;
-#endif
-	float3  worldLightDir = UnityWorldSpaceLightDir(IN.worldPos);
-	float3 worldReflect = reflect(-worldView, worldNormal);
-
-	o.Albedo = 0.5;
-	o.Emission = 0;
-	o.Specular = _Specular;
-	o.Smoothness = _Smoothness;
-	o.Occlusion = _Occlusion;
-}
-#endif

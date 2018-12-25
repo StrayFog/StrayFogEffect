@@ -79,6 +79,10 @@ Material:
     - _BumpScale: 1
     - _Culling: 0
     - _Cutoff: 0.5
+    - _DepthEnd: 10
+    - _DepthFactor: 0.17
+    - _DepthPow: 0.1
+    - _DepthStart: -2
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _Frequency: 1
@@ -113,9 +117,10 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _DeepColor: {r: 0, g: 0.32, b: 0.5, a: 0}
+    - _DeepColor: {r: 0.039215688, g: 0.22745098, b: 0.4117647, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _ShalowColor: {r: 0.23, g: 0.34, b: 0.2, a: 1}
+    - _ShalowColor: {r: 0, g: 1, b: 0.4627451, a: 1}
+    - _ShalowDeepFactor: {r: 0.17, g: 2, b: 0, a: 0}
     - _Specular: {r: 1, g: 1, b: 1, a: 1}
     - _WDirectionAB: {r: 0.3, g: 0.85, b: 0.85, a: 0.25}
     - _WDirectionCD: {r: 0.1, g: 0.9, b: 0.5, a: 0.5}

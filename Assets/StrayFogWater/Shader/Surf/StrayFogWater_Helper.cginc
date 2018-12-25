@@ -1,9 +1,28 @@
 ﻿#ifndef STRAYFOGWATER_HELPER_INCLUDED
 #define STRAYFOGWATER_HELPER_INCLUDED
 //获得CameraDepthTexture的LinearEyeDepth
-float StrayFogLinearEyeDepth(sampler2D _CameraDepthTexture, float4 _screenPos)
+inline float StrayFogLinearEyeDepth(sampler2D _CameraDepthTexture, float4 _screenPos)
 {
 	return LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2Dproj(_CameraDepthTexture, _screenPos))) - _screenPos.w;
+}
+
+inline float4 OffsetUV(float4 uv, float2 offset) {
+#ifdef UNITY_Z_0_FAR_FROM_CLIPSPACE
+	uv.xy = offset * UNITY_Z_0_FAR_FROM_CLIPSPACE(uv.z) + uv.xy;
+#else
+	uv.xy = offset * uv.z + uv.xy;
+#endif
+
+	return uv;
+}
+
+inline float4 OffsetDepth(float4 uv, float2 offset) {
+	uv.xy = offset * uv.z + uv.xy;
+	return uv;
+}
+
+inline float texDepth(sampler2D_float _Depth, float4 uv) {
+	return LinearEyeDepth(SAMPLE_DEPTH_TEXTURE_PROJ(_Depth, UNITY_PROJ_COORD(uv)));
 }
 
 // =======================================================
