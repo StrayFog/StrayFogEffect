@@ -1,9 +1,15 @@
 ﻿#ifndef STRAYFOGWATER_INCLUDED
 #define STRAYFOGWATER_INCLUDED
-#include "StrayFogWater_GerstnerWave.cginc"
-#include "StrayFogWater_Helper.cginc"
-sampler2D _CameraDepthTexture;
 
+sampler2D _CameraDepthTexture;
+struct appdata_water {
+	float4 vertex : POSITION;
+	float4 tangent : TANGENT;
+	float3 normal : NORMAL;
+	//float4 texcoord : TEXCOORD0;
+	fixed4 color : COLOR;
+	UNITY_VERTEX_INPUT_INSTANCE_ID
+};
 
 struct Input {
 	float4 BumpUVs;
@@ -25,6 +31,10 @@ struct Input {
 	INTERNAL_DATA
 };
 
+
+//Wave
+float4 _GerstnerVertexIntensity;
+
 // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
 // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
 // #pragma instancing_options assumeuniformscaling
@@ -44,5 +54,6 @@ void StrayFogSurf(Input IN, inout SurfaceOutputStandardSpecular o) {
 #ifdef _WAVEFEATURE_GERSTNER
 	o.Emission = 0.5;
 #endif
+	o.Alpha = 1;
 }
 #endif
